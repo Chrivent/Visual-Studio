@@ -394,7 +394,7 @@ float PositionAngle(Position position1, Position position2)
 	return angle;
 }
 
-Position AnglePosition(Position position, int length, int angle)
+Position AnglePosition(Position position, int length, float angle)
 {
 	return { int(position.x + length * cos(angle * Pi() / 180)), int(position.y + length * sin(angle * Pi() / 180)) };
 }

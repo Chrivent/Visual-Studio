@@ -71,8 +71,8 @@ using std::setprecision;
 
 struct Position
 {
-	int x;
-	int y;
+	int x = 0;
+	int y = 0;
 
 	Position operator + (Position position)
 	{
@@ -193,8 +193,8 @@ struct Position
 
 struct Scale
 {
-	int width;
-	int height;
+	int width = 0;
+	int height = 0;
 
 	Scale operator + (Scale scale)
 	{
@@ -333,9 +333,9 @@ int RandNum(int min, int max)
 
 bool RandBool(int denominator, int numerator)
 {
-	int randNum = RandNum(1, denominator);
+	int randNum = RandNum(0, denominator);
 
-	if (randNum >= 1 && randNum <= numerator)
+	if (randNum >= 0 && randNum <= numerator)
 		return true;
 	return false;
 }
@@ -932,6 +932,99 @@ namespace wMecro
 		HPEN oldPen = (HPEN)SelectObject(hdc, myPen);
 
 		Rectangle(hdc, transform.position.x, transform.position.y, transform.position.x + transform.scale.width, transform.position.y + transform.scale.height);
+
+		SelectObject(hdc, oldBrush);
+		DeleteObject(myBrush);
+
+		SelectObject(hdc, oldPen);
+		DeleteObject(myPen);
+	}
+
+	void DrawPolygon(HDC hdc, Transform transform, int vertexCount, COLORREF color = W_BLACK)
+	{
+		HBRUSH myBrush = CreateSolidBrush(color);
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+
+		HPEN myPen = CreatePen(PS_SOLID, 1, color);
+		HPEN oldPen = (HPEN)SelectObject(hdc, myPen);
+
+		Position centerPosition = { transform.position.x + transform.scale.width / 2, transform.position.y + transform.scale.height / 2 };
+
+		POINT* vertexs = new POINT[vertexCount];
+
+		for (int i = 0; i < vertexCount; i++)
+		{
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			POINT point = { tmp.x, tmp.y };
+			vertexs[i] = point;
+		}
+
+		Polygon(hdc, vertexs, vertexCount);
+
+		delete[] vertexs;
+		vertexs = nullptr;
+
+		SelectObject(hdc, oldBrush);
+		DeleteObject(myBrush);
+
+		SelectObject(hdc, oldPen);
+		DeleteObject(myPen);
+	}
+
+	void DrawPolygonEmpty(HDC hdc, Transform transform, int vertexCount, int thickness, COLORREF color = W_BLACK)
+	{
+		HBRUSH myBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+
+		HPEN myPen = CreatePen(PS_SOLID, thickness, color);
+		HPEN oldPen = (HPEN)SelectObject(hdc, myPen);
+
+		Position centerPosition = { transform.position.x + transform.scale.width / 2, transform.position.y + transform.scale.height / 2 };
+
+		POINT* vertexs = new POINT[vertexCount];
+
+		for (int i = 0; i < vertexCount; i++)
+		{
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			POINT point = { tmp.x, tmp.y };
+			vertexs[i] = point;
+		}
+
+		Polygon(hdc, vertexs, vertexCount);
+
+		delete[] vertexs;
+		vertexs = nullptr;
+
+		SelectObject(hdc, oldBrush);
+		DeleteObject(myBrush);
+
+		SelectObject(hdc, oldPen);
+		DeleteObject(myPen);
+	}
+
+	void DrawPolygonCustom(HDC hdc, Transform transform, int vertexCount, int thickness, COLORREF faceColor, COLORREF edgeColor = W_BLACK)
+	{
+		HBRUSH myBrush = CreateSolidBrush(faceColor);
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+
+		HPEN myPen = CreatePen(PS_SOLID, thickness, edgeColor);
+		HPEN oldPen = (HPEN)SelectObject(hdc, myPen);
+
+		Position centerPosition = { transform.position.x + transform.scale.width / 2, transform.position.y + transform.scale.height / 2 };
+
+		POINT* vertexs = new POINT[vertexCount];
+
+		for (int i = 0; i < vertexCount; i++)
+		{
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			POINT point = { tmp.x, tmp.y };
+			vertexs[i] = point;
+		}
+
+		Polygon(hdc, vertexs, vertexCount);
+
+		delete[] vertexs;
+		vertexs = nullptr;
 
 		SelectObject(hdc, oldBrush);
 		DeleteObject(myBrush);

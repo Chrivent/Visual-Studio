@@ -45,6 +45,7 @@
 #define W_PURPLE RGB(255, 0, 255)
 #define W_SKYBLUE RGB(0, 255, 255)
 #define W_WHITE RGB(255, 255, 255)
+#define W_GRAY RGB(128, 128, 128)
 
 #define LEFT 75
 #define RIGHT 77
@@ -55,6 +56,8 @@
 #define ESC 27
 #define SPACE 32
 #define BACKSPACE 8
+
+#define FRAME 30
 
 using std::string;
 using std::ofstream;
@@ -315,9 +318,9 @@ struct Scale
 
 int RandNum(int min, int max)
 {
-	static bool tmp;
+	static bool tmp = false;
 
-	if (tmp != true)
+	if (tmp == false)
 	{
 		srand((unsigned int)time(NULL));
 		tmp = true;
@@ -843,15 +846,19 @@ namespace wMecro
 
 	bool CheckPositionIsInTransform(Transform transform, Position position)
 	{
-		RECT rect;
-		rect.left = transform.position.x;
-		rect.top = transform.position.y;
-		rect.right = transform.position.x + transform.scale.width;
-		rect.bottom = transform.position.y + transform.scale.height;
+		RECT rect =
+		{
+		transform.position.x,
+		transform.position.y,
+		transform.position.x + transform.scale.width,
+		transform.position.y + transform.scale.height
+		};
 
-		POINT point;
-		point.x = position.x;
-		point.y = position.y;
+		POINT point =
+		{
+		point.x = position.x,
+		point.y = position.y
+		};
 
 		if (PtInRect(&rect, point))
 			return true;
@@ -860,17 +867,23 @@ namespace wMecro
 
 	bool CheckTransformIsIntersect(Transform transform1, Transform transform2)
 	{
-		RECT tmp, rect1, rect2;
+		RECT tmp;
 
-		rect1.left = transform1.position.x;
-		rect1.top = transform1.position.y;
-		rect1.right = transform1.position.x + transform1.scale.width;
-		rect1.bottom = transform1.position.y + transform1.scale.height;
+		RECT rect1 =
+		{
+		transform1.position.x,
+		transform1.position.y,
+		transform1.position.x + transform1.scale.width,
+		transform1.position.y + transform1.scale.height
+		};
 
-		rect2.left = transform2.position.x;
-		rect2.top = transform2.position.y;
-		rect2.right = transform2.position.x + transform2.scale.width;
-		rect2.bottom = transform2.position.y + transform2.scale.height;
+		RECT rect2 =
+		{
+		transform2.position.x,
+		transform2.position.y,
+		transform2.position.x + transform2.scale.width,
+		transform2.position.y + transform2.scale.height
+		};
 
 		if (IntersectRect(&tmp, &rect1, &rect2))
 			return true;
@@ -954,7 +967,7 @@ namespace wMecro
 
 		for (int i = 0; i < vertexCount; i++)
 		{
-			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360.0f / vertexCount * i - 90);
 			POINT point = { tmp.x, tmp.y };
 			vertexs[i] = point;
 		}
@@ -985,7 +998,7 @@ namespace wMecro
 
 		for (int i = 0; i < vertexCount; i++)
 		{
-			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360.0f / vertexCount * i - 90);
 			POINT point = { tmp.x, tmp.y };
 			vertexs[i] = point;
 		}
@@ -1016,7 +1029,7 @@ namespace wMecro
 
 		for (int i = 0; i < vertexCount; i++)
 		{
-			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360 / vertexCount * i - 90);
+			Position tmp = AnglePosition(centerPosition, (transform.scale.width + transform.scale.height) / 4, 360.0f / vertexCount * i - 90);
 			POINT point = { tmp.x, tmp.y };
 			vertexs[i] = point;
 		}

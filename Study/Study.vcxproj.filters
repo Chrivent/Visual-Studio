@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="202213111 하예찬 지뢰 찾기.cpp">
+    <ClCompile Include="202213111 하예찬 벽 충돌.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

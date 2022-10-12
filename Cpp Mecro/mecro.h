@@ -194,6 +194,31 @@ struct Position
 	}
 };
 
+struct Move
+{
+	Position position;
+
+	void MoveLeft(int distance = 1)
+	{
+		position.x -= distance;
+	}
+
+	void MoveRight(int distance = 1)
+	{
+		position.x += distance;
+	}
+
+	void MoveUp(int distance = 1)
+	{
+		position.y -= distance;
+	}
+
+	void MoveDown(int distance = 1)
+	{
+		position.y += distance;
+	}
+};
+
 struct Scale
 {
 	int width = 0;
@@ -573,31 +598,6 @@ namespace cMecro
 		return num;
 	}
 
-	struct Move
-	{
-		Position position;
-
-		void MoveLeft(int distance = 1)
-		{
-			position.x -= distance;
-		}
-
-		void MoveRight(int distance = 1)
-		{
-			position.x += distance;
-		}
-
-		void MoveUp(int distance = 1)
-		{
-			position.y -= distance;
-		}
-
-		void MoveDown(int distance = 1)
-		{
-			position.y += distance;
-		}
-	};
-
 	struct Transform : public Move
 	{
 		Scale scale;
@@ -708,7 +708,7 @@ namespace cMecro
 	template <typename Type>
 	void DrawObject(Type* object)
 	{
-		if (object != NULL)
+		if (object != nullptr)
 			object->Draw();
 	}
 
@@ -719,31 +719,31 @@ namespace cMecro
 			DrawObject(object[i]);
 	}
 
-	template <typename Type>
-	Type* GetObjectByPosition(Type* object, Position position)
+	class Game
 	{
-		if (object != NULL && object->position == position)
-			return object;
-		return NULL;
-	}
+	private:
+		int scene;
 
-	template <typename Type>
-	Type* GetObjectByPosition(vector<Type*> object, Position position)
-	{
-		for (int i = 0; i < object.size(); i++)
+	public:
+		Game()
 		{
-			if (GetObjectByPosition(object[i], position))
-				return object[i];
+			scene = 1;
 		}
-		return NULL;
-	}
+
+		void Play()
+		{
+			while (Update());
+		}
+
+		virtual void Draw() = 0;
+		virtual bool Update() = 0;
+	};
 }
 
 namespace wMecro
 {
-	struct Transform
+	struct Transform : public Move
 	{
-		Position position;
 		Scale scale;
 
 		bool operator == (Transform transform)
@@ -758,31 +758,13 @@ namespace wMecro
 				return false;
 			return true;
 		}
-
-		void MoveLeft(int distance = 1)
-		{
-			position.x -= distance;
-		}
-
-		void MoveRight(int distance = 1)
-		{
-			position.x += distance;
-		}
-
-		void MoveUp(int distance = 1)
-		{
-			position.y -= distance;
-		}
-
-		void MoveDown(int distance = 1)
-		{
-			position.y += distance;
-		}
 	};
 
 	struct Object
 	{
 		Transform transform;
+
+		Object() {}
 
 		Object(Transform transform)
 		{
@@ -791,6 +773,11 @@ namespace wMecro
 
 		virtual void Draw(HDC hdc) = 0;
 	};
+
+	Position GetMousePosition(LPARAM lParam)
+	{
+		return { LOWORD(lParam), HIWORD(lParam) };
+	}
 
 	Scale BitmapScale(HDC hdc, LPCWSTR fileName)
 	{
@@ -833,7 +820,11 @@ namespace wMecro
 		RECT rect;
 		GetWindowRect(hWnd, &rect);
 
-		return { { rect.left, rect.top }, { rect.right - rect.left, rect.bottom - rect.top } };
+		Transform tmp;
+		tmp.position = { rect.left, rect.top };
+		tmp.scale = { rect.right - rect.left, rect.bottom - rect.top };
+
+		return tmp;
 	}
 
 	Transform GetClientTransform(HWND hWnd)
@@ -841,7 +832,11 @@ namespace wMecro
 		RECT rect;
 		GetClientRect(hWnd, &rect);
 
-		return { { rect.left, rect.top }, { rect.right - rect.left, rect.bottom - rect.top } };
+		Transform tmp;
+		tmp.position = { rect.left, rect.top };
+		tmp.scale = { rect.right - rect.left, rect.bottom - rect.top };
+
+		return tmp;
 	}
 
 	bool CheckPositionIsInTransform(Transform transform, Position position)
@@ -1182,7 +1177,7 @@ namespace wMecro
 	template <typename Type>
 	void DrawObject(HDC hdc, Type* object)
 	{
-		if (object != NULL)
+		if (object != nullptr)
 			object->Draw(hdc);
 	}
 
@@ -1192,15 +1187,48 @@ namespace wMecro
 		for (int i = 0; i < object.size(); i++)
 			DrawObject(hdc, object[i]);
 	}
+
+	class Game
+	{
+	private:
+		int scene;
+
+	public:
+		Game()
+		{
+			scene = 0;
+		}
+
+		virtual void Paint(HDC hdc) = 0;
+	};
+}
+
+template <typename Type>
+Type* GetObjectByPosition(Type* object, Position position)
+{
+	if (object != nullptr && object->position == position)
+		return object;
+	return nullptr;
+}
+
+template <typename Type>
+Type* GetObjectByPosition(vector<Type*> object, Position position)
+{
+	for (int i = 0; i < object.size(); i++)
+	{
+		if (GetObjectByPosition(object[i], position))
+			return object[i];
+	}
+	return nullptr;
 }
 
 template <typename Type>
 void Delete(Type*& type)
 {
-	if (type != NULL)
+	if (type != nullptr)
 	{
 		delete type;
-		type = NULL;
+		type = nullptr;
 	}
 }
 
@@ -1241,19 +1269,19 @@ private:
 	int m_time;
 
 public:
-	StopWatch() { m_clock = NULL; m_time = 1000; }
+	StopWatch() { m_clock = nullptr; m_time = 1000; }
 
 	void SetTime(int time) { m_time = time; }
 	void Start()
 	{
-		if (m_clock != NULL)
+		if (m_clock != nullptr)
 			Delete(m_clock);
 		m_clock = new Clock;
 		m_clock->SetTime(m_time);
 	}
 	bool Stop()
 	{
-		if (m_clock != NULL && m_clock->Alarm())
+		if (m_clock != nullptr && m_clock->Alarm())
 		{
 			Delete(m_clock);
 			return true;
@@ -1264,7 +1292,7 @@ public:
 
 	~StopWatch()
 	{
-		if (m_clock != NULL)
+		if (m_clock != nullptr)
 			Delete(m_clock);
 	}
 };

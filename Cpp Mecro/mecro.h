@@ -1,6 +1,7 @@
 #pragma once
-#pragma comment(lib,"msimg32.lib")
+#pragma comment(lib, "msimg32.lib")
 #pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "Gdiplus.lib")
 
 #include<stdio.h>
 #include<stdbool.h>
@@ -14,6 +15,7 @@
 #include<tchar.h>
 #include<locale.h>
 #include<mmsystem.h>
+#include<gdiplus.h>
 #include<iostream>
 #include<iomanip>
 #include<fstream>
@@ -71,6 +73,9 @@ using std::endl;
 using std::to_string;
 using std::fixed;
 using std::setprecision;
+using Gdiplus::GdiplusStartupInput;
+using Gdiplus::Image;
+using Gdiplus::Graphics;
 
 struct Position
 {
@@ -645,6 +650,19 @@ namespace cMecro
 		}
 	};
 
+	struct Game
+	{
+		int scene = 1;
+
+		void Play()
+		{
+			while (Update());
+		}
+
+		virtual void Draw() = 0;
+		virtual bool Update() = 0;
+	};
+
 	void _DrawText(int x, int y, string text, int color = C_ORIGINAL)
 	{
 		Gotoxy(x * 2, y);
@@ -718,26 +736,6 @@ namespace cMecro
 		for (int i = 0; i < object.size(); i++)
 			DrawObject(object[i]);
 	}
-
-	class Game
-	{
-	private:
-		int scene;
-
-	public:
-		Game()
-		{
-			scene = 1;
-		}
-
-		void Play()
-		{
-			while (Update());
-		}
-
-		virtual void Draw() = 0;
-		virtual bool Update() = 0;
-	};
 }
 
 namespace wMecro
@@ -764,14 +762,49 @@ namespace wMecro
 	{
 		Transform transform;
 
-		Object() {}
+		virtual void Draw(HDC hdc) = 0;
+	};
 
-		Object(Transform transform)
-		{
-			this->transform = transform;
-		}
+	class Game
+	{
+	private:
+		int scene;
 
 		virtual void Draw(HDC hdc) = 0;
+
+	public:
+		Game()
+		{
+			scene = 0;
+		}
+
+		void Paint(HWND hWnd)
+		{
+			HDC hdc;
+			PAINTSTRUCT ps;
+
+			HDC g_MemDC;
+			HBITMAP g_hBitmap;
+			HBITMAP g_hOld;
+
+			hdc = BeginPaint(hWnd, &ps);
+
+			g_MemDC = CreateCompatibleDC(hdc);
+			g_hBitmap = CreateCompatibleBitmap(hdc, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height);
+			g_hOld = (HBITMAP)SelectObject(g_MemDC, g_hBitmap);
+
+			DrawRectangle(g_MemDC, GetClientTransform(hWnd), W_WHITE);
+
+			Draw(g_MemDC);
+
+			BitBlt(hdc, 0, 0, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height, g_MemDC, 0, 0, SRCCOPY);
+
+			SelectObject(g_MemDC, g_hOld);
+			DeleteObject(g_hBitmap);
+			DeleteDC(g_MemDC);
+
+			EndPaint(hWnd, &ps);
+		}
 	};
 
 	Position GetMousePosition(LPARAM lParam)
@@ -1174,6 +1207,22 @@ namespace wMecro
 		DeleteDC(MemDC);
 	}
 
+	void DrawGdi(HDC hdc, Transform transform, LPCWSTR fileName)
+	{
+		ULONG_PTR gdiplusToken;
+		GdiplusStartupInput gdiplusStartupInput;
+
+		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+		Image* image = Image::FromFile(fileName);
+		Graphics g(hdc);
+
+		g.DrawImage(image, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height);
+
+		delete image;
+		image = nullptr;
+	}
+
 	template <typename Type>
 	void DrawObject(HDC hdc, Type* object)
 	{
@@ -1187,20 +1236,6 @@ namespace wMecro
 		for (int i = 0; i < object.size(); i++)
 			DrawObject(hdc, object[i]);
 	}
-
-	class Game
-	{
-	private:
-		int scene;
-
-	public:
-		Game()
-		{
-			scene = 0;
-		}
-
-		virtual void Paint(HDC hdc) = 0;
-	};
 }
 
 template <typename Type>
@@ -1295,22 +1330,4 @@ public:
 		if (m_clock != nullptr)
 			Delete(m_clock);
 	}
-};
-
-class Scene
-{
-public:
-	virtual void Draw() = 0;
-};
-
-class Game
-{
-public:
-	void Play()
-	{
-		while (Update());
-	}
-
-	virtual void Draw() = 0;
-	virtual bool Update() = 0;
 };

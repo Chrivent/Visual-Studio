@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "네트워크", "네트워크.csproj", "{886FEB31-67F1-4342-8488-121F8AEC3B38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "네트워크", "네트워크.csproj", "{886FEB31-67F1-4342-8488-121F8AEC3B38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "네트워크2", "..\네트워크2\네트워크2.csproj", "{1358372B-7DA7-484E-BA6E-42A53EB8332E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{886FEB31-67F1-4342-8488-121F8AEC3B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{886FEB31-67F1-4342-8488-121F8AEC3B38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{886FEB31-67F1-4342-8488-121F8AEC3B38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1358372B-7DA7-484E-BA6E-42A53EB8332E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1358372B-7DA7-484E-BA6E-42A53EB8332E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1358372B-7DA7-484E-BA6E-42A53EB8332E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1358372B-7DA7-484E-BA6E-42A53EB8332E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

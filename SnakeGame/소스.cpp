@@ -500,5 +500,7 @@ int main()
 
 	snakeGame.Play();
 
+	cout << "¤±";
+
 	return 0;
 }

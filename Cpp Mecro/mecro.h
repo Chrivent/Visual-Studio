@@ -731,6 +731,12 @@ namespace cMecro
 	public:
 		void Play()
 		{
+			system("cls");
+
+			cout << "Loading...";
+
+			Sleep(4000);
+
 			Start();
 
 			while (Update());

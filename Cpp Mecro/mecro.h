@@ -623,11 +623,6 @@ namespace cMecro
 
 	struct Object : public Move
 	{
-		Object(Position position)
-		{
-			this->position = position;
-		}
-
 		virtual void Draw() = 0;
 	};
 
@@ -648,19 +643,6 @@ namespace cMecro
 				return false;
 			return true;
 		}
-	};
-
-	struct Game
-	{
-		int scene = 1;
-
-		void Play()
-		{
-			while (Update());
-		}
-
-		virtual void Draw() = 0;
-		virtual bool Update() = 0;
 	};
 
 	void _DrawText(int x, int y, string text, int color = C_ORIGINAL)
@@ -736,6 +718,21 @@ namespace cMecro
 		for (int i = 0; i < object.size(); i++)
 			DrawObject(object[i]);
 	}
+
+	class Game
+	{
+	protected:
+		int scene = 1;
+
+	public:
+		void Play()
+		{
+			while (Update());
+		}
+
+		virtual void Draw() = 0;
+		virtual bool Update() = 0;
+	};
 }
 
 namespace wMecro
@@ -763,48 +760,6 @@ namespace wMecro
 		Transform transform;
 
 		virtual void Draw(HDC hdc) = 0;
-	};
-
-	class Game
-	{
-	private:
-		int scene;
-
-		virtual void Draw(HDC hdc) = 0;
-
-	public:
-		Game()
-		{
-			scene = 0;
-		}
-
-		void Paint(HWND hWnd)
-		{
-			HDC hdc;
-			PAINTSTRUCT ps;
-
-			HDC g_MemDC;
-			HBITMAP g_hBitmap;
-			HBITMAP g_hOld;
-
-			hdc = BeginPaint(hWnd, &ps);
-
-			g_MemDC = CreateCompatibleDC(hdc);
-			g_hBitmap = CreateCompatibleBitmap(hdc, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height);
-			g_hOld = (HBITMAP)SelectObject(g_MemDC, g_hBitmap);
-
-			DrawRectangle(g_MemDC, GetClientTransform(hWnd), W_WHITE);
-
-			Draw(g_MemDC);
-
-			BitBlt(hdc, 0, 0, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height, g_MemDC, 0, 0, SRCCOPY);
-
-			SelectObject(g_MemDC, g_hOld);
-			DeleteObject(g_hBitmap);
-			DeleteDC(g_MemDC);
-
-			EndPaint(hWnd, &ps);
-		}
 	};
 
 	Position GetMousePosition(LPARAM lParam)
@@ -1236,6 +1191,48 @@ namespace wMecro
 		for (int i = 0; i < object.size(); i++)
 			DrawObject(hdc, object[i]);
 	}
+
+	class Game
+	{
+	protected:
+		int scene;
+
+		virtual void Draw(HDC hdc) = 0;
+
+	public:
+		Game()
+		{
+			scene = 0;
+		}
+
+		void Paint(HWND hWnd)
+		{
+			HDC hdc;
+			PAINTSTRUCT ps;
+
+			HDC g_MemDC;
+			HBITMAP g_hBitmap;
+			HBITMAP g_hOld;
+
+			hdc = BeginPaint(hWnd, &ps);
+
+			g_MemDC = CreateCompatibleDC(hdc);
+			g_hBitmap = CreateCompatibleBitmap(hdc, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height);
+			g_hOld = (HBITMAP)SelectObject(g_MemDC, g_hBitmap);
+
+			DrawRectangle(g_MemDC, GetClientTransform(hWnd), W_WHITE);
+
+			Draw(g_MemDC);
+
+			BitBlt(hdc, 0, 0, GetClientTransform(hWnd).scale.width, GetClientTransform(hWnd).scale.height, g_MemDC, 0, 0, SRCCOPY);
+
+			SelectObject(g_MemDC, g_hOld);
+			DeleteObject(g_hBitmap);
+			DeleteDC(g_MemDC);
+
+			EndPaint(hWnd, &ps);
+		}
+	};
 }
 
 template <typename Type>
@@ -1251,7 +1248,7 @@ Type* GetObjectByPosition(vector<Type*> object, Position position)
 {
 	for (int i = 0; i < object.size(); i++)
 	{
-		if (GetObjectByPosition(object[i], position))
+		if (object[i] != nullptr && object[i]->position == position)
 			return object[i];
 	}
 	return nullptr;

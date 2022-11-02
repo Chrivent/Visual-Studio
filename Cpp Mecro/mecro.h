@@ -722,16 +722,19 @@ namespace cMecro
 	class Game
 	{
 	protected:
-		int scene = 1;
+		int scene = 0;
+
+		virtual void Draw() = 0;
+		virtual void Start() = 0;
+		virtual bool Update() = 0;
 
 	public:
 		void Play()
 		{
+			Start();
+
 			while (Update());
 		}
-
-		virtual void Draw() = 0;
-		virtual bool Update() = 0;
 	};
 }
 

@@ -20,7 +20,7 @@ public:
 
 	void Draw()
 	{
-		DrawPoint(position.x, position.y, "¢Ã", head ? C_HIGH_GREEN : C_SKY_BLUE);
+		DrawPoint(position.x, position.y, head ? "¢Ã" : "¡á", head ? C_HIGH_GREEN : C_SKY_BLUE);
 	}
 };
 
@@ -119,8 +119,10 @@ public:
 
 	void RemoveAll()
 	{
-		for (int i = 0; i < length; i++)
-			Remove(i);
+		int tmp = length;
+
+		for (int i = 0; i < tmp; i++)
+			Remove(0);
 	}
 
 	int GetLength()
@@ -162,6 +164,13 @@ enum MAINMENU
 	MAINMENU_EXIT
 };
 
+enum LEVELMENU
+{
+	LEVELMENU_EASY,
+	LEVELMENU_NORMAL,
+	LEVELMENU_HARD
+};
+
 enum PLAYSIZE
 {
 	PLAYSIZE_EASY = 20,
@@ -186,8 +195,9 @@ private:
 
 	int mainSize;
 	int mainSelect;
+	int levelSelect;
 	int playSize;
-	bool start;
+	bool init;
 	int direction;
 
 	void DrawMainMenu()
@@ -197,6 +207,38 @@ private:
 		DrawTextMiddle(mainSize / 2, mainSize / 2, "Start", mainSelect == MAINMENU_PLAY ? C_GREEN : C_GRAY);
 		DrawTextMiddle(mainSize / 2, mainSize / 5 * 3, "Level", mainSelect == MAINMENU_LEVEL ? C_GREEN : C_GRAY);
 		DrawTextMiddle(mainSize / 2, mainSize / 10 * 7, "Exit", mainSelect == MAINMENU_EXIT ? C_GREEN : C_GRAY);
+	}
+
+	void DrawLevelMenu()
+	{
+		DrawBox(0, 0, mainSize, mainSize, C_PUPPLE);
+		DrawTextMiddle(mainSize / 2, mainSize / 4, "Easy", levelSelect == LEVELMENU_EASY ? C_GREEN : C_GRAY);
+		DrawTextMiddle(mainSize / 2, mainSize / 2, "Normal", levelSelect == LEVELMENU_NORMAL ? C_GREEN : C_GRAY);
+		DrawTextMiddle(mainSize / 2, mainSize / 4 * 3, "Hard", levelSelect == LEVELMENU_HARD ? C_GREEN : C_GRAY);
+	}
+
+	void SetLevel()
+	{
+		switch (levelSelect)
+		{
+		case LEVELMENU_EASY:
+			moveClock.SetTime(MOVECLOCK_EASY);
+
+			playSize = PLAYSIZE_EASY;
+			break;
+
+		case LEVELMENU_NORMAL:
+			moveClock.SetTime(MOVECLOCK_NORMAL);
+
+			playSize = PLAYSIZE_NORMAL;
+			break;
+
+		case LEVELMENU_HARD:
+			moveClock.SetTime(MOVECLOCK_HARD);
+
+			playSize = PLAYSIZE_HARD;
+			break;
+		}
 	}
 
 	void SetFoodPositionRand()
@@ -217,21 +259,21 @@ private:
 		}
 	}
 
-	void Start()
+	void Init()
 	{
 		SetScreenSize(playSize, playSize);
 
-		Node* head = bodys.GetNode(0);
 		int center = playSize / 2;
 
-		head->position = { center, center };
-		head->ActivateHead();
+		bodys.Insert(0, { center, center });
+		bodys.GetNode(0)->ActivateHead();
+
+		direction = NULL;
 
 		SetFoodPositionRand();
-
 		Draw();
 
-		start = true;
+		init = true;
 	}
 
 	void Move(int index, Position position)
@@ -250,20 +292,86 @@ private:
 		return;
 	}
 
-public:
-	SnakeGame()
+	bool CheckGameOver(Position headPos)
 	{
-		bodys.Insert(0, { 0, 0 });
-		moveClock.SetTime(MOVECLOCK_NORMAL);
+		for (int i = 1; i < bodys.GetLength(); i++)
+		{
+			if (bodys.GetNode(i)->position == headPos)
+				return true;
+		}
 
-		mainSize = 20;
-		mainSelect = MAINMENU_PLAY;
-		playSize = PLAYSIZE_NORMAL;
-		start = false;
-		direction = NULL;
+		if (headPos.x == 0 || headPos.x == playSize - 1)
+			return true;
+
+		if (headPos.y == 0 || headPos.y == playSize - 1)
+			return true;
+
+		return false;
+	}
+
+	void GameOver()
+	{
+		bodys.RemoveAll();
+
+		scene = SCENE_MAINMENU;
 
 		SetScreenSize(mainSize, mainSize);
 		Draw();
+
+		init = false;
+	}
+
+	void PlayScene()
+	{
+		if (init == false)
+			Init();
+		else
+		{
+			if (moveClock.Alarm())
+			{
+				Position headPos = bodys.GetNode(0)->position;
+
+				switch (direction)
+				{
+				case LEFT:
+					headPos.x--;
+					break;
+
+				case RIGHT:
+					headPos.x++;
+					break;
+
+				case UP:
+					headPos.y--;
+					break;
+
+				case DOWN:
+					headPos.y++;
+				}
+
+				Move(0, headPos);
+
+				if (headPos == food.position)
+				{
+					bodys.Insert(bodys.GetLength(), lastPos);
+
+					SetFoodPositionRand();
+				}
+				else if (CheckGameOver(headPos))
+				{
+					GameOver();
+
+					return;
+				}
+
+				Draw();
+			}
+		}
+
+		int hit = Hit();
+
+		if (hit == LEFT || hit == RIGHT || hit == UP || hit == DOWN)
+			direction = hit;
 	}
 
 	void Draw()
@@ -277,25 +385,32 @@ public:
 			break;
 
 		case SCENE_PLAY:
-			DrawEmptyRectangle(0, 0, playSize, playSize, "¢Ì");
-
 			for (int i = 0; i < bodys.GetLength(); i++)
 				bodys.GetNode(i)->Draw();
 
+			DrawEmptyRectangle(0, 0, playSize, playSize, "¢Ì");
+
 			food.Draw();
+			break;
+
+		case SCENE_LEVEL:
+			DrawLevelMenu();
 			break;
 		}
 	}
 
+	void Start()
+	{
+		SetScreenSize(mainSize, mainSize);
+		Draw();
+	}
+
 	bool Update()
 	{
-		int hit = Hit();
-		Position headPos;
-
 		switch (scene)
 		{
 		case SCENE_MAINMENU:
-			switch (hit)
+			switch (Hit())
 			{
 			case UP:
 				if (mainSelect > MAINMENU_PLAY)
@@ -317,55 +432,46 @@ public:
 
 			case ENTER:
 				scene = mainSelect + 1;
+
+				if (scene == SCENE_LEVEL)
+					Draw();
 				break;
 			}
 			break;
 
 		case SCENE_PLAY:
-			if (start == false)
-				Start();
-			else
-			{
-				if (moveClock.Alarm())
-				{
-					headPos = bodys.GetNode(0)->position;
-
-					switch (direction)
-					{
-					case LEFT:
-						headPos.x--;
-						break;
-
-					case RIGHT:
-						headPos.x++;
-						break;
-
-					case UP:
-						headPos.y--;
-						break;
-
-					case DOWN:
-						headPos.y++;
-					}
-
-					Move(0, headPos);
-
-					if (headPos == food.position)
-					{
-						bodys.Insert(bodys.GetLength(), lastPos);
-
-						SetFoodPositionRand();
-					}
-
-					Draw();
-				}
-			}
-
-			if (hit != NULL)
-				direction = hit;
+			PlayScene();
 			break;
 
 		case SCENE_LEVEL:
+			switch (Hit())
+			{
+			case UP:
+				if (levelSelect > LEVELMENU_EASY)
+				{
+					levelSelect--;
+
+					Draw();
+				}
+				break;
+
+			case DOWN:
+				if (levelSelect < LEVELMENU_HARD)
+				{
+					levelSelect++;
+
+					Draw();
+				}
+				break;
+
+			case ENTER:
+				SetLevel();
+
+				scene = SCENE_MAINMENU;
+
+				Draw();
+				break;
+			}
 			break;
 
 		case SCENE_EXIT:
@@ -373,6 +479,18 @@ public:
 		}
 
 		return true;
+	}
+
+public:
+	SnakeGame()
+	{
+		mainSize = 20;
+		mainSelect = MAINMENU_PLAY;
+		levelSelect = LEVELMENU_NORMAL;
+		init = false;
+		direction = NULL;
+
+		SetLevel();
 	}
 };
 

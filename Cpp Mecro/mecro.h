@@ -722,13 +722,18 @@ namespace cMecro
 	class Game
 	{
 	protected:
-		int scene = 0;
+		int scene;
 
 		virtual void Draw() = 0;
 		virtual void Start() = 0;
 		virtual bool Update() = 0;
 
 	public:
+		Game()
+		{
+			scene = 0;
+		}
+
 		void Play()
 		{
 			system("cls");
@@ -740,6 +745,14 @@ namespace cMecro
 			Start();
 
 			while (Update());
+
+			scene = 0;
+
+			system("cls");
+
+			cout << "Thank you for playing my game";
+
+			Sleep(4000);
 		}
 	};
 }

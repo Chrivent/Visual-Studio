@@ -321,6 +321,37 @@ private:
 		init = false;
 	}
 
+	void MainMenuScene()
+	{
+		switch (Hit())
+		{
+		case UP:
+			if (mainSelect > MAINMENU_PLAY)
+			{
+				mainSelect--;
+
+				Draw();
+			}
+			break;
+
+		case DOWN:
+			if (mainSelect < MAINMENU_EXIT)
+			{
+				mainSelect++;
+
+				Draw();
+			}
+			break;
+
+		case ENTER:
+			scene = mainSelect + 1;
+
+			if (scene == SCENE_LEVEL)
+				Draw();
+			break;
+		}
+	}
+
 	void PlayScene()
 	{
 		if (init == false)
@@ -372,6 +403,67 @@ private:
 
 		if (hit == LEFT || hit == RIGHT || hit == UP || hit == DOWN)
 			direction = hit;
+		else if (hit == ESC)
+		{
+			GameOver();
+
+			return;
+		}
+	}
+
+	void LevelScene()
+	{
+		int tmp = levelSelect;
+
+		switch (Hit())
+		{
+		case UP:
+			if (levelSelect > LEVELMENU_EASY)
+			{
+				levelSelect--;
+
+				Draw();
+			}
+			break;
+
+		case DOWN:
+			if (levelSelect < LEVELMENU_HARD)
+			{
+				levelSelect++;
+
+				Draw();
+			}
+			break;
+
+		case ENTER:
+			SetLevel();
+
+			scene = SCENE_MAINMENU;
+
+			Draw();
+			break;
+
+		case ESC:
+			switch (playSize)
+			{
+			case PLAYSIZE_EASY:
+				levelSelect = LEVELMENU_EASY;
+				break;
+
+			case PLAYSIZE_NORMAL:
+				levelSelect = LEVELMENU_NORMAL;
+				break;
+
+			case PLAYSIZE_HARD:
+				levelSelect = LEVELMENU_HARD;
+				break;
+			}
+
+			scene = SCENE_MAINMENU;
+
+			Draw();
+			break;
+		}
 	}
 
 	void Draw()
@@ -401,6 +493,10 @@ private:
 
 	void Start()
 	{
+		mainSelect = MAINMENU_PLAY;
+		levelSelect = LEVELMENU_NORMAL;
+
+		SetLevel();
 		SetScreenSize(mainSize, mainSize);
 		Draw();
 	}
@@ -410,33 +506,7 @@ private:
 		switch (scene)
 		{
 		case SCENE_MAINMENU:
-			switch (Hit())
-			{
-			case UP:
-				if (mainSelect > MAINMENU_PLAY)
-				{
-					mainSelect--;
-
-					Draw();
-				}
-				break;
-
-			case DOWN:
-				if (mainSelect < MAINMENU_EXIT)
-				{
-					mainSelect++;
-
-					Draw();
-				}
-				break;
-
-			case ENTER:
-				scene = mainSelect + 1;
-
-				if (scene == SCENE_LEVEL)
-					Draw();
-				break;
-			}
+			MainMenuScene();
 			break;
 
 		case SCENE_PLAY:
@@ -444,34 +514,7 @@ private:
 			break;
 
 		case SCENE_LEVEL:
-			switch (Hit())
-			{
-			case UP:
-				if (levelSelect > LEVELMENU_EASY)
-				{
-					levelSelect--;
-
-					Draw();
-				}
-				break;
-
-			case DOWN:
-				if (levelSelect < LEVELMENU_HARD)
-				{
-					levelSelect++;
-
-					Draw();
-				}
-				break;
-
-			case ENTER:
-				SetLevel();
-
-				scene = SCENE_MAINMENU;
-
-				Draw();
-				break;
-			}
+			LevelScene();
 			break;
 
 		case SCENE_EXIT:
@@ -487,10 +530,9 @@ public:
 		mainSize = 20;
 		mainSelect = MAINMENU_PLAY;
 		levelSelect = LEVELMENU_NORMAL;
+		playSize = PLAYSIZE_NORMAL;
 		init = false;
 		direction = NULL;
-
-		SetLevel();
 	}
 };
 
@@ -499,8 +541,6 @@ int main()
 	SnakeGame snakeGame;
 
 	snakeGame.Play();
-
-	cout << "¤±";
 
 	return 0;
 }

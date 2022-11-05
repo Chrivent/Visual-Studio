@@ -3,6 +3,12 @@
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "Gdiplus.lib")
 
+#include<iostream>
+#include<iomanip>
+#include<fstream>
+#include<string>
+#include<list>
+#include<vector>
 #include<stdio.h>
 #include<stdbool.h>
 #include<stdlib.h>
@@ -16,12 +22,6 @@
 #include<locale.h>
 #include<mmsystem.h>
 #include<gdiplus.h>
-#include<iostream>
-#include<iomanip>
-#include<fstream>
-#include<string>
-#include<list>
-#include<vector>
 
 #define C_BLACK 0x0000
 #define C_DARK_BLUE 0x0001
@@ -353,12 +353,14 @@ int RandNum(int min, int max)
 	if (tmp == false)
 	{
 		srand((unsigned int)time(NULL));
+
 		tmp = true;
 	}
 
 	while (true)
 	{
 		int num = rand() % max;
+
 		if (num >= min)
 			return num;
 	}
@@ -1296,57 +1298,88 @@ void Delete(vector<Type*>& type)
 class Clock
 {
 private:
-	int m_clock;
-	int m_time;
+	int _clock;
+	int time;
 
 public:
-	Clock() { m_clock = clock(); m_time = 1000; }
+	Clock()
+	{
+		_clock = clock();
+		time = 1000;
+	}
 
-	void SetTime(int time) { m_time = time; }
+	void SetTime(int time)
+	{
+		this->time = time;
+	}
+
 	bool Alarm()
 	{
 		int tmp = clock();
-		if (tmp - m_clock >= m_time)
+
+		if (tmp - _clock >= time)
 		{
-			m_clock = tmp;
+			_clock = tmp;
+
 			return true;
 		}
+
 		return false;
 	}
-	int GetTime() { return m_time; }
+
+	int GetTime()
+	{
+		return time;
+	}
 };
 
 class StopWatch
 {
 private:
-	Clock* m_clock;
-	int m_time;
+	Clock* _clock;
+	int time;
 
 public:
-	StopWatch() { m_clock = nullptr; m_time = 1000; }
+	StopWatch()
+	{
+		_clock = nullptr;
+		time = 1000;
+	}
 
-	void SetTime(int time) { m_time = time; }
+	void SetTime(int time)
+	{
+		this->time = time;
+	}
+
 	void Start()
 	{
-		if (m_clock != nullptr)
-			Delete(m_clock);
-		m_clock = new Clock;
-		m_clock->SetTime(m_time);
+		if (_clock != nullptr)
+			Delete(_clock);
+
+		_clock = new Clock;
+		_clock->SetTime(time);
 	}
+
 	bool Stop()
 	{
-		if (m_clock != nullptr && m_clock->Alarm())
+		if (_clock != nullptr && _clock->Alarm())
 		{
-			Delete(m_clock);
+			Delete(_clock);
+
 			return true;
 		}
+
 		return false;
 	}
-	int GetTime() { return m_time; }
+
+	int GetTime()
+	{
+		return time;
+	}
 
 	~StopWatch()
 	{
-		if (m_clock != nullptr)
-			Delete(m_clock);
+		if (_clock != nullptr)
+			Delete(_clock);
 	}
 };

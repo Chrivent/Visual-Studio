@@ -1,5 +1,4 @@
 #pragma once
-
 #pragma comment(lib, "msimg32.lib")
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "Gdiplus.lib")

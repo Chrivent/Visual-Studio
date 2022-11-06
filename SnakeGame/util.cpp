@@ -1,4 +1,4 @@
-#include "mecro.h"
+#include "util.h"
 
 bool Position::operator == (Position position)
 {

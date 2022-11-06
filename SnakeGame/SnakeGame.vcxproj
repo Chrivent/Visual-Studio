@@ -132,14 +132,14 @@
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="SnakeGame.cpp" />
     <ClCompile Include="소스.cpp" />
-    <ClCompile Include="mecro.cpp" />
+    <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Body.h" />
     <ClInclude Include="Food.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="SnakeGame.h" />
-    <ClInclude Include="mecro.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

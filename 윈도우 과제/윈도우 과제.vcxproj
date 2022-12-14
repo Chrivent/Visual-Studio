@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{791a45e9-d2fc-416c-96c2-c3b052bf0f43}</ProjectGuid>
+    <ProjectGuid>{85b180e0-ed56-4789-9540-69e2fe0cc612}</ProjectGuid>
     <RootNamespace>윈도우과제</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="202213111 하예찬 도형그리기 메뉴.cpp" />
+    <ClCompile Include="202213111 하예찬 연산자 오버로딩.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

@@ -1,88 +1,165 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-// 몇몇 내용을 추가합니다.
+﻿using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using MySqlX.XDevAPI;
+using System.Data;
+using Org.BouncyCastle.Utilities;
+using MySql.Data.MySqlClient;
 
-namespace NetworkGameServer
+class NetworkServer
 {
-    class NetworkServer
+    static List<TcpClient> clients = new List<TcpClient>();
+    static NetworkDatabase? database;
+
+    static void Main(string[] args)
     {
-        static List<TcpClient> clientsList = new List<TcpClient>();
-        
-        static void Main(string[] args)
+        Console.Write("Enter database name : ");
+        string? databaseName = Console.ReadLine();
+
+        using (database = new NetworkDatabase(databaseName!))
         {
-            // 서버를 동작시키는데 별도의 스레드로 구동
-            Thread serverThread = new Thread(serverFunc);
+            Thread serverThread = new Thread(ServerThread);
 
             serverThread.IsBackground = true;
             serverThread.Start();
-            Thread.Sleep(500);
 
-            Console.WriteLine(" *** 서버가 정상 구동 되었습니다. ***");
-            Console.WriteLine(" 서버를 종료하려면 아무키나 누르세요...");
+            Console.WriteLine("*** Server is running ***");
+            Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
+
+            foreach (TcpClient client in clients)
+            {
+                NetworkStream sendStream = client.GetStream();
+                byte[] bytes = Encoding.Default.GetBytes("Down/:");
+                sendStream.Write(bytes, 0, bytes.Length);
+                client.Close();
+            }
 
             serverThread.Interrupt();
         }
 
-        static void serverFunc()
+        Console.WriteLine("Server is down");
+    }
+
+    static void ServerThread()
+    {
+        TcpListener listener = new TcpListener(IPAddress.Any, 10200);
+        listener.Start();
+
+        while (true)
         {
-            // 네트워크 기능 추가
-            TcpListener listener = new TcpListener(IPAddress.Any, 10200);
-            listener.Start();
-            Console.WriteLine("Waiting for client connections...");
+            TcpClient client = listener.AcceptTcpClient();
+            clients.Add(client);
 
-            while (true)
+            Thread clientThread = new Thread(() => ClientThread(client));
+            clientThread.Start();
+        }
+    }
+
+    static void ClientThread(TcpClient client)
+    {
+        NetworkStream stream = client.GetStream();
+        byte[] bytes = new byte[1024];
+        string? nickname = null;
+
+        try
+        {
+            int count = stream.Read(bytes, 0, bytes.Length);
+            string connectData = Encoding.Default.GetString(bytes, 0, count);
+            WriteLog(connectData);
+
+            SendToOtherClient(client, connectData);
+
+            string connectCommand = connectData.Split("/")[0];
+            nickname = connectData.Substring(connectCommand.Length + 1).Split(":")[0];
+
+            while ((count = stream.Read(bytes, 0, bytes.Length)) != 0)
             {
-                TcpClient client = listener.AcceptTcpClient();
-                clientsList.Add(client); // 새로운 클라이언트 연결을 리스트에 추가
-                Console.WriteLine("Client connected.");
+                string data = Encoding.Default.GetString(bytes, 0, count);
+                string command = data.Split("/")[0];
 
-                // 새로운 클라이언트와 통신하기 위한 스레드 시작
-                Thread clientThread = new Thread(() => ClientHandler(client));
-                clientThread.Start();
+                if (command == "Disconnect")
+                    throw new Exception();
+
+                WriteLog(data);
+
+                if (command == "Database")
+                    SendToDatabase(data);
+                else
+                    SendToOtherClient(client, data);
             }
         }
-
-        static void ClientHandler(TcpClient client)
+        catch (Exception ex)
         {
-            NetworkStream stream = client.GetStream();
-            byte[] buffer = new byte[1024];
-            int bytes;
-
-            try
-            {
-                while ((bytes = stream.Read(buffer, 0, buffer.Length)) != 0)
-                {
-                    string data = Encoding.Default.GetString(buffer, 0, bytes);
-                    Console.WriteLine(data);
-
-                    // 모든 클라이언트에게 메시지 전송
-                    foreach (TcpClient c in clientsList)
-                    {
-                        if (c != client) // 메시지를 보낸 클라이언트를 제외하고 전송
-                        {
-                            NetworkStream sendStream = c.GetStream();
-                            byte[] msg = Encoding.Default.GetBytes(data);
-                            sendStream.Write(msg, 0, msg.Length);
-                        }
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                // 클라이언트와의 연결이 끊어졌을 때 발생하는 예외 처리
-                Console.WriteLine("Client disconnected: " + ex.Message);
-            }
-
-            // Clean up the client connection.
-            client.Close();
-            clientsList.Remove(client); // 연결을 리스트에서 제거
+            WriteLog("Disconnect/" + nickname + ":", ex);
         }
+
+        SendToOtherClient(client, "Disconnect/" + nickname + ":");
+
+        client.Close();
+        clients.Remove(client);
+    }
+
+    static void WriteLog(string data, Exception? ex = null)
+    {
+        string command = data.Split("/")[0];
+        string nickname = data.Substring(command.Length + 1).Split(":")[0];
+        string msg = data.Substring(command.Length + nickname.Length + 2);
+
+        switch (command)
+        {
+            case "Connect":
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " is connected to server");
+                break;
+
+            case "Disconnect":
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " is disconnected to server (" + ex!.Message + ")");
+                break;
+
+            case "Chat":
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " : " + msg);
+                break;
+
+            case "Database":
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " => " + msg);
+                break;
+
+            default:
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " - " + msg);
+                break;
+        }
+    }
+
+    static string GetTIme()
+    {
+        return
+            DateTime.Now.Year + "/" +
+            DateTime.Now.Month + "/" +
+            DateTime.Now.Day + " " +
+            DateTime.Now.Hour + ":" +
+            DateTime.Now.Minute + ":" +
+            DateTime.Now.Second;
+    }
+
+    static void SendToOtherClient(TcpClient client, string data)
+    {
+        foreach (TcpClient c in clients)
+        {
+            if (c != client && c.Connected)
+            {
+                NetworkStream sendStream = c.GetStream();
+                byte[] bytes = Encoding.Default.GetBytes(data);
+                sendStream.Write(bytes, 0, bytes.Length);
+            }
+        }
+    }
+
+    static void SendToDatabase(string data)
+    {
+        string command = data.Split("/")[0];
+        string nickname = data.Substring(command.Length + 1).Split(":")[0];
+        string msg = data.Substring(command.Length + nickname.Length + 2);
+
+        database!.UploadQuery(msg);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
+using System;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
 
 class NetworkDatabase : IDisposable
@@ -7,6 +9,7 @@ class NetworkDatabase : IDisposable
     MySqlConnection connection;
     public string uid = "root";
     public string password = "root";
+    public bool connect = false;
 
     public NetworkDatabase(string database)
     {
@@ -16,6 +19,7 @@ class NetworkDatabase : IDisposable
         try
         {
             connection.Open();
+            connect = true;
             Console.WriteLine("MySQL Connection Successful!");
         }
         catch (MySqlException ex)
@@ -24,11 +28,44 @@ class NetworkDatabase : IDisposable
         }
     }
 
-    public void UploadQuery(string query)
+    public void SendQuery(string query)
     {
-        MySqlCommand command = new MySqlCommand(query, connection);
+        try
+        {
+            MySqlCommand command = new MySqlCommand(query, connection);
+            command.ExecuteNonQuery();
+        }
+        catch (MySqlException ex)
+        {
+            Console.WriteLine("MySQL Error : " + ex.Number + " - " + ex.Message);
+        }
+    }
 
-        command.ExecuteNonQuery();
+    public string ReceiveQuery(string query)
+    {
+        string data = "";
+
+        try
+        {
+            MySqlCommand command = new MySqlCommand(query, connection);
+            MySqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                    data += reader[i].ToString() + "|";
+                data = data.Substring(0, data.Length - 1);
+                data += "_";
+            }
+
+            reader.Close();
+        }
+        catch (MySqlException ex)
+        {
+            Console.WriteLine("MySQL Error : " + ex.Number + " - " + ex.Message);
+        }
+
+        return data!.Substring(0, data.Length - 1);
     }
 
     public void Dispose()
@@ -36,6 +73,7 @@ class NetworkDatabase : IDisposable
         if (connection != null)
         {
             connection.Close();
+            connect = false;
             Console.WriteLine("MySQL Connection Closed.");
         }
     }

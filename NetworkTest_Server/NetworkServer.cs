@@ -18,24 +18,27 @@ class NetworkServer
 
         using (database = new NetworkDatabase(databaseName!))
         {
-            Thread serverThread = new Thread(ServerThread);
-
-            serverThread.IsBackground = true;
-            serverThread.Start();
-
-            Console.WriteLine("*** Server is running ***");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadLine();
-
-            foreach (TcpClient client in clients)
+            if (database.connect)
             {
-                NetworkStream sendStream = client.GetStream();
-                byte[] bytes = Encoding.Default.GetBytes("Down/:");
-                sendStream.Write(bytes, 0, bytes.Length);
-                client.Close();
-            }
+                Thread serverThread = new Thread(ServerThread);
 
-            serverThread.Interrupt();
+                serverThread.IsBackground = true;
+                serverThread.Start();
+
+                Console.WriteLine("*** Server is running ***");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadLine();
+
+                foreach (TcpClient client in clients)
+                {
+                    NetworkStream stream = client.GetStream();
+                    byte[] bytes = Encoding.Default.GetBytes("Down/:");
+                    stream.Write(bytes, 0, bytes.Length);
+                    client.Close();
+                }
+
+                serverThread.Interrupt();
+            }
         }
 
         Console.WriteLine("Server is down");
@@ -83,8 +86,10 @@ class NetworkServer
 
                 WriteLog(data);
 
-                if (command == "Database")
+                if (command == "Database(Send)")
                     SendToDatabase(data);
+                else if (command == "Database(Receive)")
+                    ReceiveFromDatabase(client, data);
                 else
                     SendToOtherClient(client, data);
             }
@@ -120,7 +125,11 @@ class NetworkServer
                 Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " : " + msg);
                 break;
 
-            case "Database":
+            case "Database(Send)":
+                Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " => " + msg);
+                break;
+
+            case "Database(Receive)":
                 Console.WriteLine("[" + GetTIme() + "] [" + command + "] " + nickname + " => " + msg);
                 break;
 
@@ -147,9 +156,9 @@ class NetworkServer
         {
             if (c != client && c.Connected)
             {
-                NetworkStream sendStream = c.GetStream();
+                NetworkStream stream = c.GetStream();
                 byte[] bytes = Encoding.Default.GetBytes(data);
-                sendStream.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes, 0, bytes.Length);
             }
         }
     }
@@ -160,6 +169,17 @@ class NetworkServer
         string nickname = data.Substring(command.Length + 1).Split(":")[0];
         string msg = data.Substring(command.Length + nickname.Length + 2);
 
-        database!.UploadQuery(msg);
+        database!.SendQuery(msg);
+    }
+
+    static void ReceiveFromDatabase(TcpClient client, string data)
+    {
+        string command = data.Split("/")[0];
+        string nickname = data.Substring(command.Length + 1).Split(":")[0];
+        string msg = data.Substring(command.Length + nickname.Length + 2);
+
+        NetworkStream stream = client.GetStream();
+        byte[] bytes = Encoding.Default.GetBytes("Database(Receive)/:" + database!.ReceiveQuery(msg));
+        stream.Write(bytes, 0, bytes.Length);
     }
 }

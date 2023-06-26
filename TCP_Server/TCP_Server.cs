@@ -6,7 +6,7 @@ using System.Data;
 using Org.BouncyCastle.Utilities;
 using MySql.Data.MySqlClient;
 
-class NetworkServer
+class TCP_Server
 {
     static List<TcpClient> clients = new List<TcpClient>();
     static NetworkDatabase? database;

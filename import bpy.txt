@@ -1,0 +1,65 @@
+import bpy
+import mathutils
+import math
+
+def rename_bones():
+    armature = bpy.context.object
+
+    # 본 이름을 바꾸고자 하는 본 이름과 새로운 이름의 매핑
+    bone_name_mapping = {
+        "Hips": "下半身",
+        "Spine": "上半身",
+        "Chest": "上半身2",
+        "Neck": "首",
+        "Head": "頭"
+        # 추가적인 본 이름 매핑을 필요한 만큼 계속해서 추가할 수 있습니다.
+    }
+
+    # 모든 본에 대해 반복하면서 이름을 변경합니다.
+    for bone in armature.pose.bones:
+        if bone.name in bone_name_mapping:
+            new_name = bone_name_mapping[bone.name]
+            bone.name = new_name
+            print(f"{bone.name} 이름이 변경되었습니다.")
+
+# 스크립트 실행
+rename_bones()
+
+def create_center_bone():
+    armature = bpy.context.object
+
+    # 센터 본 이름
+    center_bone_name = "センター"
+    
+    # 이미 센터 본이 존재하는지 확인
+    if center_bone_name in armature.data.edit_bones:
+        print(f"{center_bone_name} 본이 이미 존재합니다.")
+        return
+
+    # 하반신 본의 이름
+    lower_bone = armature.data.edit_bones.get("下半身")
+    
+    # 상반신 본의 이름
+    upper_bone = armature.data.edit_bones.get("上半身")
+
+    # 센터 본 생성
+    center_bone = armature.data.edit_bones.new(center_bone_name)
+
+    # 하반신 본들의 위치를 찾아 최소값과 최대값을 계산합니다.
+    lower_y = lower_bone.head.y
+
+    # 센터 본의 위치를 하반신 본과 바닥 사이의 2/3 위치로 설정합니다.
+    center_bone_location = mathutils.Vector((0, lower_y * 2 / 3, 0))
+    center_bone.head = center_bone_location
+    center_bone.tail = mathutils.Vector((0, 0, 0))
+
+    # 하반신 본을 센터 본의 자식으로 설정
+    lower_bone.parent = center_bone
+    
+    # 상반신 본을 센터 본의 자식으로 설정
+    upper_bone.parent = center_bone
+
+    print(f"{center_bone_name} 본이 생성되었습니다.")
+
+# 스크립트 실행
+create_center_bone()

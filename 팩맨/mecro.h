@@ -1179,7 +1179,7 @@ namespace wMecro
 			index = widthCell * heightCell - 1;
 
 		Scale bitmapScale = BitmapScale(hdc, fileName);
-		StretchBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / heightCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, SRCCOPY);
+		StretchBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / widthCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, SRCCOPY);
 
 		SelectObject(MemDC, oldBitmap);
 		DeleteObject(myBitmap);
@@ -1197,7 +1197,7 @@ namespace wMecro
 			index = widthCell * heightCell - 1;
 
 		Scale bitmapScale = BitmapScale(hdc, fileName);
-		TransparentBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index % heightCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, color);
+		TransparentBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / widthCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, color);
 
 		SelectObject(MemDC, oldBitmap);
 		DeleteObject(myBitmap);

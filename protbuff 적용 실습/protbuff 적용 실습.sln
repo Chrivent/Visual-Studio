@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "protbuff 적용 실습", "protbuff 적용 실습.vcxproj", "{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Debug|x64.ActiveCfg = Debug|x64
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Debug|x64.Build.0 = Debug|x64
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Debug|x86.ActiveCfg = Debug|Win32
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Debug|x86.Build.0 = Debug|Win32
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Release|x64.ActiveCfg = Release|x64
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Release|x64.Build.0 = Release|x64
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Release|x86.ActiveCfg = Release|Win32
+		{48371BD2-2BB3-4BA9-8A2D-3A6794E14DD5}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D92A29C-1197-4A11-B295-55BC5D969F54}
+	EndGlobalSection
+EndGlobal

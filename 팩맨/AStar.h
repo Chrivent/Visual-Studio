@@ -11,10 +11,10 @@ public:
 
 	bool FindPath(Position startPos, Position endPos, vector<Path*> paths, int cellWidth, int cellHeight);
 	void ClearPath(vector<Path*> paths);
+	void SetDebug(bool debug, vector<Path*> paths);
+	bool GetDebug() { return debug; }
 
 	stack<Position> pathPoses;
-
-	bool debug;
 
 private:
 	int** map;
@@ -28,6 +28,8 @@ private:
 
 	bool foundPath;
 
+	bool debug;
+
 	void ExtractMin(Position& choicePos, Position endPos);
 
 	void SetWeight(Position position, int weight) { weightMap[position.y][position.x] = weight; }
@@ -38,6 +40,7 @@ private:
 
 	void ReleaseParent();
 	void ResetWeightAndVisit();
+	void ResetPathDebug(vector<Path*> paths);
 
 	bool CheckIsPath(Position position);
 };

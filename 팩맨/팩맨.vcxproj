@@ -136,6 +136,7 @@
     <ClInclude Include="PacMan.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Wall.h" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +148,9 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Wall.cpp" />
     <ClCompile Include="팩맨.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="팩맨.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

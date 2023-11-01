@@ -115,6 +115,7 @@ bool AStar::FindPath(Position startPos, Position endPos, vector<Path*> paths, in
 		{
 			pos = parentPoses[pos.y][pos.x];
 			pathPoses.push(pos);
+
 			if (debug)
 			{
 				for (int j = 0; j < paths.size(); j++)
@@ -146,13 +147,14 @@ void AStar::ClearPath(vector<Path*> paths)
 		pathPoses.pop();
 
 	if (debug)
-	{
-		for (int j = 0; j < paths.size(); j++)
-		{
-			paths[j]->debugVisit = false;
-			paths[j]->debugToGo = false;
-		}
-	}
+		ResetPathDebug(paths);
+}
+
+void AStar::SetDebug(bool debug, vector<Path*> paths)
+{
+	this->debug = debug;
+
+	ResetPathDebug(paths);
 }
 
 void AStar::ExtractMin(Position& choicePos, Position endPos)
@@ -206,6 +208,15 @@ void AStar::ResetWeightAndVisit()
 			weightMap[y][x] = 1000;
 			visitMap[y][x] = false;
 		}
+	}
+}
+
+void AStar::ResetPathDebug(vector<Path*> paths)
+{
+	for (int j = 0; j < paths.size(); j++)
+	{
+		paths[j]->debugVisit = false;
+		paths[j]->debugToGo = false;
 	}
 }
 

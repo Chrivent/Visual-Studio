@@ -39,6 +39,8 @@ public:
 	int playerSpeed;
     int enemySpeed;
 
+    bool debug;
+
 protected:
 	virtual void Draw(HDC hdc, HWND hWnd) override;
 
@@ -47,8 +49,6 @@ private:
 
 	int cellWidth;
 	int cellHeight;
-
-    bool debug;
 
 	Player* player;
     vector<Wall*> walls;

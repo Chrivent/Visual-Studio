@@ -449,7 +449,6 @@ struct Move
 		if (this->position.y > position.y)
 			MoveUp(distance);
 	}
-
 };
 
 namespace cMecro

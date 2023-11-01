@@ -1,4 +1,5 @@
 ﻿#include<Windows.h>
+#include "resource.h"
 #include "PacMan.h"
 
 #pragma warning(disable: 28251)
@@ -23,7 +24,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmd
 	WndClass.hInstance = hInstance;
 	WndClass.lpfnWndProc = WndProc;
 	WndClass.lpszClassName = lpszClass;
-	WndClass.lpszMenuName = NULL;
+	WndClass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 	WndClass.style = CS_HREDRAW | CS_VREDRAW;
 
 	RegisterClass(&WndClass);
@@ -122,6 +123,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		return 0;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case ID_DEBUG:
+			pacMan.debug = !pacMan.debug;
+			break;
+		}
 	}
 
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));

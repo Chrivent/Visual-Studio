@@ -75,7 +75,7 @@ PacMan::PacMan(int clientWidth, int clientHeight)
 				enemyYs.push_back(enemy->transform.position.y / cellHeight);
 
 				AStar* aStar = new AStar(map, WIDTH, HEIGHT);
-				aStar->debug = debug;
+				aStar->SetDebug(debug, paths);
 				enemyAStars.push_back(aStar);
 			}
 		}
@@ -269,9 +269,9 @@ void PacMan::Draw(HDC hdc, HWND hWnd)
 	wMecro::DrawObject(hdc, coins);
 	wMecro::DrawObject(hdc, player);
 	wMecro::DrawObject(hdc, enemys);
-	if (debug)
+	for (int i = 0; i < enemys.size(); i++)
 	{
-		for (int i = 0; i < enemys.size(); i++)
+		if (debug)
 		{
 			Position enemyPos = enemys[i]->transform.position;
 			enemyPos.x += cellWidth / 2;
@@ -283,6 +283,9 @@ void PacMan::Draw(HDC hdc, HWND hWnd)
 
 			wMecro::DrawLine(hdc, enemyPos, playerPos, 3, W_RED);
 		}
+
+		if (enemyAStars[i]->GetDebug() != debug)
+			enemyAStars[i]->SetDebug(debug, paths);
 	}
 }
 

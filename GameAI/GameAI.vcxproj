@@ -18,6 +18,23 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EnterMineAndDigForNugget.cpp" />
+    <ClCompile Include="GoHomeAndSleepTilRested.cpp" />
+    <ClCompile Include="Miner.cpp" />
+    <ClCompile Include="QuenchThirst.cpp" />
+    <ClCompile Include="VisitBankAndDepositGold.cpp" />
+    <ClCompile Include="소스.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseGameEntity.h" />
+    <ClInclude Include="EnterMineAndDigForNugget.h" />
+    <ClInclude Include="GoHomeAndSleepTilRested.h" />
+    <ClInclude Include="Miner.h" />
+    <ClInclude Include="QuenchThirst.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="VisitBankAndDepositGold.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -126,18 +143,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="AStar.cpp" />
-    <ClCompile Include="Dijkstra.cpp" />
-    <ClCompile Include="GameMap.cpp" />
-    <ClCompile Include="소스.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AStar.h" />
-    <ClInclude Include="Dijkstra.h" />
-    <ClInclude Include="GameMap.h" />
-    <ClInclude Include="init.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

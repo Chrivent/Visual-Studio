@@ -1,21 +1,12 @@
-#include "GameMap.h"
-#include "Dijkstra.h"
-#include "AStar.h"
+#include "Miner.h"
+#include "EnterMineAndDigForNugget.h"
 
 int main()
 {
-	CGameMap* gameMap = new CGameMap(10, 10);
-	AStar* shortestPath = new AStar(gameMap);
+	Miner miner("Miner", &EnterMineAndDigForNugget::Instance(), 5, 7, 15);
 
-	shortestPath->Draw();
-	shortestPath->FindPath(0, 9, 9, 0);
-	shortestPath->Draw();
-
-	if (gameMap)
-		delete gameMap;
-
-	if (shortestPath)
-		delete shortestPath;
+	while(true)
+		miner.Update();
 
 	return 0;
 }

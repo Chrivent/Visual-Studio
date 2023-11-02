@@ -132,6 +132,10 @@
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="GridObject.h" />
+    <ClInclude Include="Hunter.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="InBox.h" />
     <ClInclude Include="mecro.h" />
     <ClInclude Include="PacMan.h" />
     <ClInclude Include="Path.h" />
@@ -143,6 +147,9 @@
     <ClCompile Include="AStar.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="GridObject.cpp" />
+    <ClCompile Include="Hunter.cpp" />
+    <ClCompile Include="InBox.cpp" />
     <ClCompile Include="PacMan.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="Player.cpp" />

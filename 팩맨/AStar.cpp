@@ -1,17 +1,17 @@
 #include "AStar.h"
 #include "PacMan.h"
 
-AStar::AStar(int** map, int width, int height) : map(map), width(width), height(height)
+AStar::AStar(int** maps) : maps(maps)
 {
 	foundPath = false;
 
-	weightMap = new int* [height];
-	visitMap = new bool* [height];
+	weightMap = new int* [HEIGHT];
+	visitMap = new bool* [HEIGHT];
 
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < HEIGHT; i++)
 	{
-		weightMap[i] = new int[width];
-		visitMap[i] = new bool[width];
+		weightMap[i] = new int[WIDTH];
+		visitMap[i] = new bool[WIDTH];
 	}
 
 	ResetWeightAndVisit();
@@ -23,14 +23,14 @@ AStar::~AStar()
 {
 	if (weightMap)
 	{
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < HEIGHT; y++)
 			Delete(weightMap[y]);
 		Delete(weightMap);
 	}
 
 	if (visitMap)
 	{
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < HEIGHT; y++)
 			Delete(visitMap[y]);
 		Delete(visitMap);
 	}
@@ -38,26 +38,28 @@ AStar::~AStar()
 	ReleaseParent();
 }
 
-bool AStar::FindPath(Position startPos, Position endPos, vector<Path*> paths, int cellWidth, int cellHeight)
+bool AStar::FindPath(Position startGridPosition, Position endGridPosition, vector<Path*> paths, PacMan* pacMan)
 {
+	Scale cellScale = pacMan->GetCellScale();
+
 	foundPath = false;
 
-	parentPoses = new Position * [height];
+	parentGridPostions = new Position * [HEIGHT];
 
-	for (int i = 0; i < height; i++)
-		parentPoses[i] = new Position[width];
+	for (int i = 0; i < HEIGHT; i++)
+		parentGridPostions[i] = new Position[WIDTH];
 
-	SetWeight(startPos, 0);
+	SetWeight(startGridPosition, 0);
 
-	Position choicePos = startPos;
-	parentPoses[startPos.y][startPos.x] = choicePos;
+	Position choicePosition = startGridPosition;
+	parentGridPostions[startGridPosition.y][startGridPosition.x] = choicePosition;
 
-	for (int i = 0; i < width * height; i++)
+	for (int i = 0; i < WIDTH * HEIGHT; i++)
 	{
-		SetVisit(choicePos, true);
-		visitNodes.push_back(choicePos);
+		SetVisit(choicePosition, true);
+		visitNodes.push_back(choicePosition);
 		
-		if (choicePos == endPos)
+		if (choicePosition == endGridPosition)
 		{
 			foundPath = true;
 			break;
@@ -69,8 +71,8 @@ bool AStar::FindPath(Position startPos, Position endPos, vector<Path*> paths, in
 			{
 				Position pathPosition = paths[j]->transform.position;
 
-				if (pathPosition.x == choicePos.x * cellWidth && pathPosition.y == choicePos.y * cellHeight)
-					paths[j]->debugVisit = true;
+				if (pathPosition.x == choicePosition.x * cellScale.width && pathPosition.y == choicePosition.y * cellScale.height)
+					paths[j]->SetDebugVisit(true);
 			}
 		}
 
@@ -80,27 +82,27 @@ bool AStar::FindPath(Position startPos, Position endPos, vector<Path*> paths, in
 			{
 				if ((x == 0) != (y == 0))
 				{
-					Position nearPos = { choicePos.x + x, choicePos.y + y };
+					Position nearPosition = { choicePosition.x + x, choicePosition.y + y };
 
-					if (!CheckIsPath(nearPos))
+					if (!pacMan->GridPositionIsPath(nearPosition))
 						continue;
 
-					if (GetVisit(nearPos) == false)
+					if (GetVisit(nearPosition) == false)
 					{
-						int dist = 10;
-						int cost = GetWeight(choicePos) + dist;
+						int distance = 10;
+						int cost = GetWeight(choicePosition) + distance;
 
-						if (GetWeight(nearPos) > cost)
+						if (GetWeight(nearPosition) > cost)
 						{
-							SetWeight(nearPos, cost);
-							parentPoses[nearPos.y][nearPos.x] = choicePos;
+							SetWeight(nearPosition, cost);
+							parentGridPostions[nearPosition.y][nearPosition.x] = choicePosition;
 						}
 					}
 				}
 			}
 		}
 
-		ExtractMin(choicePos, endPos);
+		ExtractMin(choicePosition, endGridPosition, pacMan);
 	}
 
 	visitNodes.clear();
@@ -108,26 +110,26 @@ bool AStar::FindPath(Position startPos, Position endPos, vector<Path*> paths, in
 
 	if (foundPath)
 	{
-		Position pos = endPos;
-		pathPoses.push(pos);
+		Position tmpPosition = endGridPosition;
+		pathGridPositions.push(tmpPosition);
 
-		while (pos != startPos)
+		while (tmpPosition != startGridPosition)
 		{
-			pos = parentPoses[pos.y][pos.x];
-			pathPoses.push(pos);
+			tmpPosition = parentGridPostions[tmpPosition.y][tmpPosition.x];
+			pathGridPositions.push(tmpPosition);
 
 			if (debug)
 			{
-				for (int j = 0; j < paths.size(); j++)
+				for (int i = 0; i < paths.size(); i++)
 				{
-					Position pathPosition = paths[j]->transform.position;
+					Position pathPosition = paths[i]->transform.position;
 
-					if (pathPosition.x == pos.x * cellWidth && pathPosition.y == pos.y * cellHeight)
-						paths[j]->debugToGo = true;
+					if (pathPosition.x == tmpPosition.x * cellScale.width && pathPosition.y == tmpPosition.y * cellScale.height)
+						paths[i]->SetDebugToGo(true);
 				}
 			}
 		}
-		pathPoses.pop();
+		pathGridPositions.pop();
 
 		ReleaseParent();
 		return true;
@@ -143,8 +145,8 @@ void AStar::ClearPath(vector<Path*> paths)
 	ResetWeightAndVisit();
 	ReleaseParent();
 
-	while (!pathPoses.empty())
-		pathPoses.pop();
+	while (!pathGridPositions.empty())
+		pathGridPositions.pop();
 
 	if (debug)
 		ResetPathDebug(paths);
@@ -157,7 +159,7 @@ void AStar::SetDebug(bool debug, vector<Path*> paths)
 	ResetPathDebug(paths);
 }
 
-void AStar::ExtractMin(Position& choicePos, Position endPos)
+void AStar::ExtractMin(Position& choiceGridPosition, Position endGridPosition, PacMan* pacMan)
 {
 	int min = INT_MAX;
 
@@ -169,19 +171,19 @@ void AStar::ExtractMin(Position& choicePos, Position endPos)
 			{
 				if ((x == 0) != (y == 0))
 				{
-					Position curPos = { visitNodes[i].x + x, visitNodes[i].y + y};
+					Position currentPosition = { visitNodes[i].x + x, visitNodes[i].y + y};
 
-					if (!CheckIsPath(curPos))
+					if (!pacMan->GridPositionIsPath(currentPosition))
 						continue;
 
-					int hx = abs(endPos.x - curPos.x) * 10;
-					int hy = abs(endPos.y - curPos.y) * 10;
-					int distance = hx + hy;
+					int distanceX = abs(endGridPosition.x - currentPosition.x) * 10;
+					int distanceY = abs(endGridPosition.y - currentPosition.y) * 10;
+					int distance = distanceX + distanceY;
 
-					if (GetWeight(curPos) + distance < min && GetVisit(curPos) == false)
+					if (GetWeight(currentPosition) + distance < min && GetVisit(currentPosition) == false)
 					{
-						min = GetWeight(curPos) + distance;
-						choicePos = curPos;
+						min = GetWeight(currentPosition) + distance;
+						choiceGridPosition = currentPosition;
 					}
 				}
 			}
@@ -191,19 +193,19 @@ void AStar::ExtractMin(Position& choicePos, Position endPos)
 
 void AStar::ReleaseParent()
 {
-	if (parentPoses)
+	if (parentGridPostions)
 	{
-		for (int y = 0; y < height; y++)
-			Delete(parentPoses[y]);
-		Delete(parentPoses);
+		for (int y = 0; y < HEIGHT; y++)
+			Delete(parentGridPostions[y]);
+		Delete(parentGridPostions);
 	}
 }
 
 void AStar::ResetWeightAndVisit()
 {
-	for (int y = 0; y < height; y++)
+	for (int y = 0; y < HEIGHT; y++)
 	{
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < WIDTH; x++)
 		{
 			weightMap[y][x] = 1000;
 			visitMap[y][x] = false;
@@ -213,21 +215,9 @@ void AStar::ResetWeightAndVisit()
 
 void AStar::ResetPathDebug(vector<Path*> paths)
 {
-	for (int j = 0; j < paths.size(); j++)
+	for (int i = 0; i < paths.size(); i++)
 	{
-		paths[j]->debugVisit = false;
-		paths[j]->debugToGo = false;
+		paths[i]->SetDebugVisit(false);
+		paths[i]->SetDebugToGo(false);
 	}
-}
-
-bool AStar::CheckIsPath(Position position)
-{
-	if (position.x >= 0 &&
-		position.x < width &&
-		position.y >= 0 &&
-		position.y < height &&
-		map[position.y][position.x] != WALL)
-		return true;
-
-	return false;
 }

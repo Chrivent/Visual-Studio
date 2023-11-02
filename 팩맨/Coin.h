@@ -2,6 +2,12 @@
 
 #include "mecro.h"
 
+enum Type
+{
+	Normal,
+	Big
+};
+
 class Coin : public wMecro::Object
 {
 public:

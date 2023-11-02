@@ -18,27 +18,42 @@
     <ClCompile Include="소스.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameMap.cpp">
+    <ClCompile Include="EnterMineAndDigForNugget.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Dijkstra.cpp">
+    <ClCompile Include="GoHomeAndSleepTilRested.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="AStar.cpp">
+    <ClCompile Include="Miner.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="QuenchThirst.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="VisitBankAndDepositGold.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameMap.h">
+    <ClInclude Include="VisitBankAndDepositGold.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="init.h">
+    <ClInclude Include="BaseGameEntity.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Dijkstra.h">
+    <ClInclude Include="EnterMineAndDigForNugget.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AStar.h">
+    <ClInclude Include="GoHomeAndSleepTilRested.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Miner.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="QuenchThirst.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

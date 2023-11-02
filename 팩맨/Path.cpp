@@ -14,5 +14,8 @@ void Path::Draw(HDC hdc)
 void Path::DrawDebug(HDC hdc)
 {
 	if (debugVisit)
-		wMecro::DrawRectangle(hdc, transform, debugToGo ? W_GREEN : W_GRAY);
+	{
+		COLORREF color = RGB(index % 3 == 2 ? 128 : 0, index % 3 == 0 ? 128 : 0, index % 3 == 1 ? 128 : 0);
+		wMecro::DrawRectangle(hdc, transform, debugToGo ? color : RGB(64, 64, 64));
+	}
 }

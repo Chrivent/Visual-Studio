@@ -914,6 +914,16 @@ namespace wMecro
 		return false;
 	}
 
+	inline int GetDistance(Position position1, Position position2)
+	{
+		int distanceX = position1.x - position2.x;
+		int distanceY = position1.y - position2.y;
+
+		int distance = (int)sqrt(distanceX * distanceX + distanceY * distanceY);
+
+		return distance;
+	}
+
 	inline void DrawLine(HDC hdc, Position position1, Position position2, int thickness, COLORREF color = W_BLACK)
 	{
 		HPEN myPen = CreatePen(PS_SOLID, thickness, color);

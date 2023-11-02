@@ -13,6 +13,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmd
 	HWND hWnd;
 	MSG Message;
 	WNDCLASS WndClass;
+	HACCEL hAccel;
 
 	g_hInst = hInstance;
 
@@ -30,14 +31,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmd
 	RegisterClass(&WndClass);
 
 	hWnd = CreateWindow(lpszClass, lpszClass, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, (HMENU)NULL, hInstance, NULL);
+	hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	ShowWindow(hWnd, nCmdShow);
 
 	while (GetMessage(&Message, NULL, 0, 0))
 	{
-		TranslateMessage(&Message);
+		if (!TranslateAccelerator(hWnd, hAccel, &Message))
+		{
+			TranslateMessage(&Message);
 
-		DispatchMessage(&Message);
+			DispatchMessage(&Message);
+		}
 	}
 
 	return (int)Message.wParam;
@@ -49,7 +54,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	//static Scale clientScale = { 760, 880 };
 	static Scale clientScale = { 723, 841 };
 	static Position clientPosition = { 0, 0 };
-	static PacMan pacMan(clientScale.width, clientScale.height);
+	static PacMan pacMan(clientScale);
+	static WPARAM key;
 
 	switch (iMessage)
 	{
@@ -63,12 +69,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		wMecro::SetClientTransform(hWnd, clientTransform);
 
 		SetTimer(hWnd, 1, 15, NULL);
-		SetTimer(hWnd, 2, 30, NULL);
-		SetTimer(hWnd, 3, 1, NULL);
-		SetTimer(hWnd, 4, 1, NULL);
+		SetTimer(hWnd, 2, 1, NULL);
+		SetTimer(hWnd, 3, 30, NULL);
+		SetTimer(hWnd, 4, 90, NULL);
+		SetTimer(hWnd, 5, 4000, NULL);
 
-		pacMan.playerSpeed = 5;
-		pacMan.enemySpeed = 3;
+		pacMan.SetPlayerSpeed(3);
+		pacMan.SetEnemySpeed(3);
 
 		return 0;
 
@@ -77,6 +84,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		KillTimer(hWnd, 2);
 		KillTimer(hWnd, 3);
 		KillTimer(hWnd, 4);
+		KillTimer(hWnd, 5);
 
 		PostQuitMessage(0);
 		return 0;
@@ -89,15 +97,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case 2:
-			pacMan.PlayerGaspUpdate();
+			pacMan.PlayerMoveUpdate();
+			pacMan.EnemyMoveUpdate();
 			break;
 
 		case 3:
-			pacMan.PlayerMoveUpdate();
+			pacMan.PlayerGaspUpdate();
 			break;
 
 		case 4:
-			pacMan.EnemyMoveUpdate();
+			pacMan.EnemyStepUpdate();
+			break;
+
+		case 5:
+			pacMan.OpenDoor();
 			break;
 		}
 		return 0;
@@ -128,7 +141,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case ID_DEBUG:
-			pacMan.debug = !pacMan.debug;
+			pacMan.SetDebug(!pacMan.GetDebug());
 			break;
 		}
 	}

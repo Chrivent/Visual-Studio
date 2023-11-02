@@ -449,7 +449,6 @@ struct Move
 		if (this->position.y > position.y)
 			MoveUp(distance);
 	}
-
 };
 
 namespace cMecro
@@ -915,6 +914,16 @@ namespace wMecro
 		return false;
 	}
 
+	inline int GetDistance(Position position1, Position position2)
+	{
+		int distanceX = position1.x - position2.x;
+		int distanceY = position1.y - position2.y;
+
+		int distance = sqrt(distanceX * distanceX + distanceY * distanceY);
+
+		return distance;
+	}
+
 	inline void DrawLine(HDC hdc, Position position1, Position position2, int thickness, COLORREF color = W_BLACK)
 	{
 		HPEN myPen = CreatePen(PS_SOLID, thickness, color);
@@ -1179,7 +1188,7 @@ namespace wMecro
 			index = widthCell * heightCell - 1;
 
 		Scale bitmapScale = BitmapScale(hdc, fileName);
-		StretchBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / heightCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, SRCCOPY);
+		StretchBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / widthCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, SRCCOPY);
 
 		SelectObject(MemDC, oldBitmap);
 		DeleteObject(myBitmap);
@@ -1197,7 +1206,7 @@ namespace wMecro
 			index = widthCell * heightCell - 1;
 
 		Scale bitmapScale = BitmapScale(hdc, fileName);
-		TransparentBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index % heightCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, color);
+		TransparentBlt(hdc, transform.position.x, transform.position.y, transform.scale.width, transform.scale.height, MemDC, bitmapScale.width / widthCell * (index % widthCell), bitmapScale.height / heightCell * (index / widthCell), bitmapScale.width / widthCell, bitmapScale.height / heightCell, color);
 
 		SelectObject(MemDC, oldBitmap);
 		DeleteObject(myBitmap);

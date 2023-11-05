@@ -175,7 +175,9 @@ void Enemy::MoveHunted(Pacman* pacman)
 	if (pacman->GetEnemyHunted())
 	{
 		pacman->ResetAllHuntedTimer();
-		pacman->SetEnemyHunted(false);
+
+		if (pacman->AllEnemyIsHunted())
+			pacman->SetEnemyHunted(false);
 	}
 
 	if (huntedTimer < huntedTime)

@@ -16,7 +16,23 @@ void Path::DrawDebug(HDC hdc) const
 {
 	if (debugVisit)
 	{
-		const COLORREF color = RGB(index % 3 == 2 ? 128 : 0, index % 3 == 0 ? 128 : 0, index % 3 == 1 ? 128 : 0);
+		COLORREF color;
+		switch (index % 4)
+		{
+		case 0:
+			color = RGB(0, 128, 0);
+			break;
+		case 1:
+			color = RGB(0, 0, 128);
+			break;
+		case 2:
+			color = RGB(128, 0, 0);
+			break;
+		case 3:
+			color = RGB(128, 128, 0);
+			break;
+		}
+
 		DrawRectangle(hdc, transform, debugToGo ? color : RGB(64, 64, 64));
 	}
 }

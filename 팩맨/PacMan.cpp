@@ -200,7 +200,7 @@ void Pacman::EnemyMoveUpdate()
 
 		if (doorOpenTimer < doorOpenTime)
 			doorOpenTimer++;
-		else if (doorOpenCount < enemys.size())
+		else if (doorOpenCount <= enemys.size())
 		{
 			doorOpenCount++;
 			doorOpenTimer = 0;

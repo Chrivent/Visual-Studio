@@ -218,10 +218,10 @@ void Player::CheckCoin(Pacman* pacman) const
 
 void Player::CheckEnemy(Pacman* pacman) const
 {
-	const vector<Enemy*> enemys = pacman->GetEnemys();
+	const vector<Enemy*> enemies = pacman->GetEnemies();
 	const Scale cellScale = pacman->GetCellScale();
 
-	for (const Enemy* enemy : enemys)
+	for (const Enemy* enemy : enemies)
 	{
 		if (enemy->GetHunter())
 		{

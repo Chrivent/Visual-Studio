@@ -115,12 +115,12 @@ void Pacman::InitEntity()
 				Enemy* enemy = new Enemy();
 				enemy->transform.position = position;
 				enemy->transform.scale = cellScale;
-				enemys.push_back(enemy);
+				enemies.push_back(enemy);
 			}
 		}
 	}
 
-	for (int i = 0; i < enemys.size(); i++)
+	for (int i = 0; i < enemies.size(); i++)
 	{
 		vector<Path*> tmpPaths;
 		for (int y = 0; y < HEIGHT; y++)
@@ -146,18 +146,18 @@ void Pacman::InitEntity()
 	player->SetTargetGridPosition(player->GetGridPosition());
 
 	bool lookUp = true;
-	for (int i = 0; i < enemys.size(); i++)
+	for (int i = 0; i < enemies.size(); i++)
 	{
-		enemys[i]->SetDirection(lookUp ? Up : Down);
-		enemys[i]->SetIndex(i);
-		const Position gridPosition = ConvertPositionToGridPosition(enemys[i]->transform.position, 0);
-		enemys[i]->SetGridPosition(gridPosition);
-		enemys[i]->SetTargetGridPosition(gridPosition);
-		enemys[i]->SetEndGridPosition(gridPosition);
-		enemys[i]->SetStartGridPosition(gridPosition);
+		enemies[i]->SetDirection(lookUp ? Up : Down);
+		enemies[i]->SetIndex(i);
+		const Position gridPosition = ConvertPositionToGridPosition(enemies[i]->transform.position, 0);
+		enemies[i]->SetGridPosition(gridPosition);
+		enemies[i]->SetTargetGridPosition(gridPosition);
+		enemies[i]->SetEndGridPosition(gridPosition);
+		enemies[i]->SetStartGridPosition(gridPosition);
 
-		enemys[i]->GetAStar()->SetDebug(debug, paths[i]);
-		enemys[i]->SetStayPositions(enemys[i]->transform.position, cellScale);
+		enemies[i]->GetAStar()->SetDebug(debug, paths[i]);
+		enemies[i]->SetStayPositions(enemies[i]->transform.position, cellScale);
 
 		for (int j = 0; j < paths[i].size(); j++)
 			paths[i][j]->SetIndex(i);
@@ -170,13 +170,13 @@ void Pacman::DeleteEntity()
 {
 	Delete(player);
 	Delete(coins);
-	Delete(enemys);
-	for (int i = 0; i < enemys.size(); i++)
+	Delete(enemies);
+	for (int i = 0; i < enemies.size(); i++)
 		Delete(paths[i]);
 
 	coins.clear();
-	enemys.clear();
-	for (int i = 0; i < enemys.size(); i++)
+	enemies.clear();
+	for (int i = 0; i < enemies.size(); i++)
 		paths[i].clear();
 	paths.clear();
 }
@@ -195,12 +195,12 @@ void Pacman::EnemyMoveUpdate()
 {
 	if (!gameOver)
 	{
-		for (Enemy*& enemy : enemys)
+		for (Enemy*& enemy : enemies)
 			enemy->Move(this);
 
 		if (doorOpenTimer < doorOpenTime)
 			doorOpenTimer++;
-		else if (doorOpenCount <= enemys.size())
+		else if (doorOpenCount <= enemies.size())
 		{
 			doorOpenCount++;
 			doorOpenTimer = 0;
@@ -210,7 +210,7 @@ void Pacman::EnemyMoveUpdate()
 
 void Pacman::EnemyStepUpdate() const
 {
-	for (Enemy* enemy : enemys)
+	for (Enemy* enemy : enemies)
 		enemy->Step();
 }
 
@@ -252,7 +252,7 @@ void Pacman::AddScore(int score)
 
 void Pacman::ResetAllHuntedTimer() const
 {
-	for (Enemy* enemy : enemys)
+	for (Enemy* enemy : enemies)
 		enemy->ResetHuntedTimer();
 }
 
@@ -270,15 +270,15 @@ void Pacman::ResetGame()
 
 void Pacman::GameClear()
 {
-	Delete(enemys);
-	enemys.clear();
+	Delete(enemies);
+	enemies.clear();
 
 	gameClear = true;
 }
 
 bool Pacman::AllEnemyIsHunted() const
 {
-	for (const Enemy* enemy : enemys)
+	for (const Enemy* enemy : enemies)
 	{
 		if (!enemy->GetHunted())
 			return false;
@@ -313,11 +313,11 @@ void Pacman::Draw(HDC hdc, HWND hWnd)
 	DrawObject(hdc, walls);
 	if (!gameOver)
 	{
-		for (int i = static_cast<int>(enemys.size()) - 1; i >= 0; i--)
+		for (int i = static_cast<int>(enemies.size()) - 1; i >= 0; i--)
 		{
 			DrawObject(hdc, paths[i]);
 
-			AStar* aStar = enemys[i]->GetAStar();
+			AStar* aStar = enemies[i]->GetAStar();
 			if (aStar->GetDebug() != debug)
 				aStar->SetDebug(debug, paths[i]);
 		}
@@ -325,7 +325,7 @@ void Pacman::Draw(HDC hdc, HWND hWnd)
 	DrawObject(hdc, doors);
 	if (!gameOver)
 	{
-		for (Enemy*& enemy : enemys)
+		for (Enemy*& enemy : enemies)
 		{
 			if (debug && enemy->DetectedPlayer(this) && enemy->GetHunter())
 			{
@@ -345,15 +345,15 @@ void Pacman::Draw(HDC hdc, HWND hWnd)
 	DrawObject(hdc, player);
 	if (!player->IsFallDown())
 	{
-		for (int i = static_cast<int>(enemys.size()) - 1; i >= 0; i--)
+		for (int i = static_cast<int>(enemies.size()) - 1; i >= 0; i--)
 		{
-			DrawObject(hdc, enemys[i]);
+			DrawObject(hdc, enemies[i]);
 
-			if (enemys[i]->GetDebug() != debug)
-				enemys[i]->SetDebug(debug);
+			if (enemies[i]->GetDebug() != debug)
+				enemies[i]->SetDebug(debug);
 
-			if (enemys[i]->DetectedPlayer(this))
-				enemys[i]->SetDebug(false);
+			if (enemies[i]->DetectedPlayer(this))
+				enemies[i]->SetDebug(false);
 		}
 	}
 	const wstring scoreStr = std::to_wstring(score);

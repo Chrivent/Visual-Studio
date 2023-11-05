@@ -30,7 +30,7 @@ public:
 
     Player* GetPlayer() const { return player; }
     vector<Coin*>& GetCoins() { return coins; }
-    vector<Enemy*> GetEnemys() { return enemys; }
+    vector<Enemy*> GetEnemies() { return enemies; }
     vector<vector<Path*>> GetPaths() { return paths; }
     int** GetMaps() const { return maps; }
     wMecro::Transform GetScoreTextTransform() const { return scoreTextTransform; }
@@ -68,7 +68,7 @@ private:
 	Player* player;
     vector<Wall*> walls;
     vector<Coin*> coins;
-    vector<Enemy*> enemys;
+    vector<Enemy*> enemies;
     vector<vector<Path*>> paths;
     vector<Door*> doors;
     wMecro::Transform scoreTextTransform;

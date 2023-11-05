@@ -15,7 +15,7 @@ public:
 
 	void Gasp();
 	void Move(Pacman* pacman);
-	static bool GridPositionIsPath(Position gridPosition, const Pacman* pacman);
+	bool GridPositionIsPath(Position gridPosition, const Pacman* pacman);
 	void CheckCoin(Pacman* pacman) const;
 	void CheckEnemy(Pacman* pacman) const;
 	bool IsFallDown() const;

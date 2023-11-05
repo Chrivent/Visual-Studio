@@ -9,10 +9,10 @@ AStar::AStar()
 	weightMap = new int* [HEIGHT];
 	visitMap = new bool* [HEIGHT];
 
-	for (int i = 0; i < HEIGHT; i++)
+	for (int y = 0; y < HEIGHT; y++)
 	{
-		weightMap[i] = new int[WIDTH];
-		visitMap[i] = new bool[WIDTH];
+		weightMap[y] = new int[WIDTH];
+		visitMap[y] = new bool[WIDTH];
 	}
 
 	ResetWeightAndVisit();

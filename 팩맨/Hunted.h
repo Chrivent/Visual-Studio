@@ -2,10 +2,10 @@
 
 #include "State.h"
 
-class InBox : public State
+class Hunted : public State
 {
 public:
-	static InBox& Instance();
+	static Hunted& Instance();
 
 	void Start(Enemy* enemy, Pacman* pacman) override;
 	void Update(Enemy* enemy, Pacman* pacman) override;

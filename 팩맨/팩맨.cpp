@@ -1,6 +1,6 @@
 ﻿#include<Windows.h>
 #include "resource.h"
-#include "PacMan.h"
+#include "Pacman.h"
 
 #pragma warning(disable: 28251)
 
@@ -51,31 +51,28 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmd
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	static wMecro::Transform clientTransform;
-	//static Scale clientScale = { 760, 880 };
-	static Scale clientScale = { 723, 841 };
+	static int cellSize = 40;
+	static Scale clientScale = { WIDTH * cellSize, HEIGHT * cellSize };
 	static Position clientPosition = { 0, 0 };
-	static PacMan pacMan(clientScale);
+	static Pacman pacman(clientScale);
 	static WPARAM key;
+
+	static Scale windowScale;
+	static Position windowPosition;
 
 	switch (iMessage)
 	{
 	case WM_CREATE:
-		//clientPosition.x = (wMecro::GetWindowTransform(hWnd).scale.width - clientScale.width) / 2;
-		//clientPosition.y = (wMecro::GetWindowTransform(hWnd).scale.height - clientScale.height) / 2;
-
 		clientTransform.position = clientPosition;
+		clientScale.height += pacman.GetScoreTextTransform().scale.height + 20;
 		clientTransform.scale = clientScale;
 
-		wMecro::SetClientTransform(hWnd, clientTransform);
+		SetClientTransform(hWnd, clientTransform);
 
 		SetTimer(hWnd, 1, 15, NULL);
 		SetTimer(hWnd, 2, 1, NULL);
 		SetTimer(hWnd, 3, 30, NULL);
 		SetTimer(hWnd, 4, 90, NULL);
-		SetTimer(hWnd, 5, 4000, NULL);
-
-		pacMan.SetPlayerSpeed(3);
-		pacMan.SetEnemySpeed(3);
 
 		return 0;
 
@@ -84,7 +81,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		KillTimer(hWnd, 2);
 		KillTimer(hWnd, 3);
 		KillTimer(hWnd, 4);
-		KillTimer(hWnd, 5);
 
 		PostQuitMessage(0);
 		return 0;
@@ -97,42 +93,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case 2:
-			pacMan.PlayerMoveUpdate();
-			pacMan.EnemyMoveUpdate();
+			pacman.PlayerMoveUpdate();
+			pacman.EnemyMoveUpdate();
 			break;
 
 		case 3:
-			pacMan.PlayerGaspUpdate();
+			pacman.PlayerGaspUpdate();
 			break;
 
 		case 4:
-			pacMan.EnemyStepUpdate();
-			break;
-
-		case 5:
-			pacMan.OpenDoor();
+			pacman.EnemyStepUpdate();
 			break;
 		}
 		return 0;
 
 	case WM_PAINT:
-		pacMan.Paint(hWnd);
+		pacman.Paint(hWnd);
 		return 0;
 
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
 		case VK_LEFT:
-			pacMan.SetPlayerDirection(Left);
+			pacman.SetInputDirection(Left);
 			break;
 		case VK_RIGHT:
-			pacMan.SetPlayerDirection(Right);
+			pacman.SetInputDirection(Right);
 			break;
 		case VK_UP:
-			pacMan.SetPlayerDirection(Up);
+			pacman.SetInputDirection(Up);
 			break;
 		case VK_DOWN:
-			pacMan.SetPlayerDirection(Down);
+			pacman.SetInputDirection(Down);
 			break;
 		}
 		return 0;
@@ -141,7 +133,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case ID_DEBUG:
-			pacMan.SetDebug(!pacMan.GetDebug());
+			pacman.SetDebug(!pacman.GetDebug());
 			break;
 		}
 	}

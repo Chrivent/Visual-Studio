@@ -2,26 +2,30 @@
 
 #include "GridObject.h"
 
+class Pacman;
+
 class Player : public GridObject
 {
 public:
 	Player();
 
-	virtual void Draw(HDC hdc) override;
+	void Draw(HDC hdc) override;
 
 	void SetMoving(bool moving) { this->moving = moving; }
-	void SetTargetGridPosition(Position targetGridPosition) { this->targetGridPosition = targetGridPosition; }
-
-	Position GetTargetGridPosition() { return targetGridPosition; }
 
 	void Gasp();
+	void Move(Pacman* pacman);
+	static bool GridPositionIsPath(Position gridPosition, const Pacman* pacman);
+	void CheckCoin(Pacman* pacman) const;
+	void CheckEnemy(Pacman* pacman) const;
+	bool IsFallDown() const;
 
 private:
 	bool moving;
 
-	Position targetGridPosition;
-
 	int gaspIndex;
 	bool gaspOpening;
+	int deadTime;
+	int deadTimer;
 };
 

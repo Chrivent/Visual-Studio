@@ -1,6 +1,6 @@
-#include "PacMan.h"
+#include "Pacman.h"
 
-PacMan::PacMan(Scale clientScale)
+Pacman::Pacman(Scale clientScale)
 {
 	maps = new int* [HEIGHT];
 	for (int y = 0; y < HEIGHT; y++)
@@ -14,13 +14,15 @@ PacMan::PacMan(Scale clientScale)
 	cellScale.width = clientScale.width / WIDTH;
 	cellScale.height = clientScale.height / HEIGHT;
 
-	debug = true;
+	InitParameter();
+
+	debug = false;
 
 	for (int y = 0; y < HEIGHT; y++)
 	{
 		for (int x = 0; x < WIDTH; x++)
 		{
-			Position position = ConvertGridPositionToPosition({ x, y });
+			const Position position = ConvertGridPositionToPosition({ x, y });
 
 			if (maps[y][x] == WALL)
 			{
@@ -30,18 +32,75 @@ PacMan::PacMan(Scale clientScale)
 				walls.push_back(wall);
 			}
 
+			if (maps[y][x] == DOOR)
+			{
+				Door* door = new Door;
+				door->transform.position = position;
+				door->transform.scale = cellScale;
+				doors.push_back(door);
+			}
+		}
+	}
+
+	InitEntity();
+
+	scoreTextTransform.position = { 0, cellScale.height * HEIGHT };
+	scoreTextTransform.scale = cellScale;
+	scoreTextTransform.scale.width /= 3;
+	scoreTextTransform.scale.width *= 2;
+
+	gameClearTextTransform.position = { cellScale.width * WIDTH / 40 * 9, cellScale.height * HEIGHT / 5 * 2 };
+	gameClearTextTransform.scale = cellScale;
+	gameClearTextTransform.scale.width *= 2;
+	gameClearTextTransform.scale.height *= 3;
+}
+
+Pacman::~Pacman()
+{
+	DeleteEntity();
+	Delete(walls);
+	Delete(doors);
+	if (maps)
+	{
+		for (int y = 0; y < HEIGHT; y++)
+			Delete(maps[y]);
+		Delete(maps);
+	}
+}
+
+void Pacman::InitParameter()
+{
+	doorOpenCount = 0;
+	doorOpenTime = 300;
+	doorOpenTimer = 0;
+	enemyHunted = false;
+	score = 0;
+	gameOver = false;
+	gameClear = false;
+}
+
+void Pacman::InitEntity()
+{
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			const Position position = ConvertGridPositionToPosition({ x, y });
+
 			if (maps[y][x] == COIN)
 			{
-				Coin* coin = new Coin;
+				Coin* coin = new Coin(Small);
 				coin->transform.position = position;
 				coin->transform.scale = cellScale;
 				coins.push_back(coin);
 			}
 
-			if (maps[y][x] == DOOR)
+			if (maps[y][x] == BIG_COIN)
 			{
-				Position doorPosition = position;
-				doorPositions.push_back(doorPosition);
+				Coin* coin = new Coin(Big);
+				coin->transform.position = position;
+				coin->transform.scale = cellScale;
+				coins.push_back(coin);
 			}
 
 			if (maps[y][x] == PLAYER)
@@ -68,7 +127,7 @@ PacMan::PacMan(Scale clientScale)
 		{
 			for (int x = 0; x < WIDTH; x++)
 			{
-				Position position = ConvertGridPositionToPosition({ x, y });
+				const Position position = ConvertGridPositionToPosition({ x, y });
 
 				if (maps[y][x] != WALL)
 				{
@@ -82,8 +141,8 @@ PacMan::PacMan(Scale clientScale)
 		paths.push_back(tmpPaths);
 	}
 
-	playerDirection = player->GetDirection();
-	player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position));
+	inputDirection = player->GetDirection();
+	player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position, 0));
 	player->SetTargetGridPosition(player->GetGridPosition());
 
 	bool lookUp = true;
@@ -91,12 +150,12 @@ PacMan::PacMan(Scale clientScale)
 	{
 		enemys[i]->SetDirection(lookUp ? Up : Down);
 		enemys[i]->SetIndex(i);
-		Position gridPosition = ConvertPositionToGridPosition(enemys[i]->transform.position);
+		const Position gridPosition = ConvertPositionToGridPosition(enemys[i]->transform.position, 0);
 		enemys[i]->SetGridPosition(gridPosition);
-		enemys[i]->SetTargetPosition(enemys[i]->transform.position);
+		enemys[i]->SetTargetGridPosition(gridPosition);
 		enemys[i]->SetEndGridPosition(gridPosition);
+		enemys[i]->SetStartGridPosition(gridPosition);
 
-		enemys[i]->CreateAStar(maps);
 		enemys[i]->GetAStar()->SetDebug(debug, paths[i]);
 		enemys[i]->SetStayPositions(enemys[i]->transform.position, cellScale);
 
@@ -107,193 +166,138 @@ PacMan::PacMan(Scale clientScale)
 	}
 }
 
-PacMan::~PacMan()
+void Pacman::DeleteEntity()
 {
 	Delete(player);
-	Delete(walls);
 	Delete(coins);
 	Delete(enemys);
 	for (int i = 0; i < enemys.size(); i++)
 		Delete(paths[i]);
-	if (maps)
-	{
-		for (int y = 0; y < HEIGHT; y++)
-			Delete(maps[y]);
-		Delete(maps);
-	}
+
+	coins.clear();
+	enemys.clear();
+	for (int i = 0; i < enemys.size(); i++)
+		paths[i].clear();
+	paths.clear();
 }
 
-void PacMan::PlayerMoveUpdate()
+void Pacman::PlayerMoveUpdate()
 {
-	int errorX = player->transform.position.x % cellScale.width;
-	int errorY = player->transform.position.y % cellScale.height;
-
-	if (errorX < playerSpeed && errorY < playerSpeed)
-	{
-		player->SetDirection(playerDirection);
-
-		player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position));
-		player->transform.position = ConvertGridPositionToPosition(player->GetGridPosition());
-
-		CheckCoin();
-	}
-
-	Position playerGridPosition = player->GetGridPosition();
-	switch (player->GetDirection())
-	{
-	case Left:
-		if (player->transform.position.x <= 0)
-		{
-			player->transform.position.x = cellScale.width * WIDTH - 1;
-			playerGridPosition = ConvertPositionToGridPosition(player->transform.position);
-			player->SetGridPosition(playerGridPosition);
-		}
-
-		if (CheckPlayerPath(maps[playerGridPosition.y][playerGridPosition.x - 1]))
-		{
-			player->transform.MoveLeft(playerSpeed);
-			player->SetMoving(true);
-			playerGridPosition.x--;
-			player->SetTargetGridPosition(playerGridPosition);
-		}
-		else
-			player->SetMoving(false);
-		break;
-
-	case Right:
-		if (player->transform.position.x >= cellScale.width * (WIDTH - 1))
-		{
-			player->transform.position.x = 0;
-			player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position));
-		}
-
-		if (CheckPlayerPath(maps[playerGridPosition.y][playerGridPosition.x + 1]))
-		{
-			player->transform.MoveRight(playerSpeed);
-			player->SetMoving(true);
-			playerGridPosition.x++;
-			player->SetTargetGridPosition(playerGridPosition);
-		}
-		else
-			player->SetMoving(false);
-		break;
-
-	case Up:
-		if (player->transform.position.y <= 0)
-		{
-			player->transform.position.y = cellScale.height * HEIGHT - 1;
-			player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position));
-		}
-
-		if (CheckPlayerPath(maps[playerGridPosition.y - 1][playerGridPosition.x]))
-		{
-			player->transform.MoveUp(playerSpeed);
-			player->SetMoving(true);
-			playerGridPosition.y--;
-			player->SetTargetGridPosition(playerGridPosition);
-		}
-		else
-			player->SetMoving(false);
-		break;
-
-	case Down:
-		if (player->transform.position.y >= cellScale.height * (HEIGHT - 1))
-		{
-			player->transform.position.y = 0;
-			player->SetGridPosition(ConvertPositionToGridPosition(player->transform.position));
-		}
-
-		if (CheckPlayerPath(maps[playerGridPosition.y + 1][playerGridPosition.x]))
-		{
-			player->transform.MoveDown(playerSpeed);
-			player->SetMoving(true);
-			playerGridPosition.y++;
-			player->SetTargetGridPosition(playerGridPosition);
-		}
-		else
-			player->SetMoving(false);
-		break;
-	}
+	player->Move(this);
 }
 
-void PacMan::PlayerGaspUpdate()
+void Pacman::PlayerGaspUpdate() const
 {
 	player->Gasp();
 }
 
-void PacMan::EnemyMoveUpdate()
+void Pacman::EnemyMoveUpdate()
 {
-	for (int i = 0; i < enemys.size(); i++)
-		enemys[i]->Update(this);
+	if (!gameOver)
+	{
+		for (Enemy*& enemy : enemys)
+			enemy->Move(this);
+
+		if (doorOpenTimer < doorOpenTime)
+			doorOpenTimer++;
+		else if (doorOpenCount < enemys.size())
+		{
+			doorOpenCount++;
+			doorOpenTimer = 0;
+		}
+	}
 }
 
-void PacMan::EnemyStepUpdate()
+void Pacman::EnemyStepUpdate() const
 {
-	for (int i = 0; i < enemys.size(); i++)
-		enemys[i]->Step();
+	for (Enemy* enemy : enemys)
+		enemy->Step();
 }
 
-void PacMan::SetPlayerDirection(Direction direction)
+void Pacman::SetInputDirection(Direction direction)
 {
 	bool canSet = false;
 
 	switch (direction)
 	{
 	case Left:
-		if (CheckPlayerPath(maps[player->GetTargetGridPosition().y][player->GetTargetGridPosition().x - 1]))
+		if (player->GridPositionIsPath({ player->GetTargetGridPosition().x - 1, player->GetTargetGridPosition().y }, this))
 			canSet = true;
 		break;
 
 	case Right:
-		if (CheckPlayerPath(maps[player->GetTargetGridPosition().y][player->GetTargetGridPosition().x + 1]))
+		if (player->GridPositionIsPath({ player->GetTargetGridPosition().x + 1, player->GetTargetGridPosition().y }, this))
 			canSet = true;
 		break;
 
 	case Up:
-		if (CheckPlayerPath(maps[player->GetTargetGridPosition().y - 1][player->GetTargetGridPosition().x]))
+		if (player->GridPositionIsPath({ player->GetTargetGridPosition().x, player->GetTargetGridPosition().y - 1 }, this))
 			canSet = true;
 		break;
 
 	case Down:
-		if (CheckPlayerPath(maps[player->GetTargetGridPosition().y + 1][player->GetTargetGridPosition().x]))
+		if (player->GridPositionIsPath({ player->GetTargetGridPosition().x, player->GetTargetGridPosition().y + 1 }, this))
 			canSet = true;
 		break;
 	}
 
 	if (canSet)
-		playerDirection = direction;
+		inputDirection = direction;
 }
 
-void PacMan::OpenDoor()
+void Pacman::AddScore(int score)
 {
-	if (doorOpenCount < enemys.size())
-		doorOpenCount++;
+	this->score += score;
 }
 
-bool PacMan::GridPositionIsPath(Position position)
+void Pacman::ResetAllHuntedTimer() const
 {
-	if (position.x >= 0 &&
-		position.x < WIDTH &&
-		position.y >= 0 &&
-		position.y < HEIGHT &&
-		maps[position.y][position.x] != WALL &&
-		maps[position.y][position.x] != TRANSPARENT_WALL)
-		return true;
-
-	return false;
+	for (Enemy* enemy : enemys)
+		enemy->ResetHuntedTimer();
 }
 
-Position PacMan::ConvertPositionToGridPosition(Position position)
+void Pacman::GameOver()
+{
+	gameOver = true;
+}
+
+void Pacman::ResetGame()
+{
+	DeleteEntity();
+	InitParameter();
+	InitEntity();
+}
+
+void Pacman::GameClear()
+{
+	Delete(enemys);
+	enemys.clear();
+
+	gameClear = true;
+}
+
+bool Pacman::AllEnemyIsHunted() const
+{
+	for (const Enemy* enemy : enemys)
+	{
+		if (!enemy->GetHunted())
+			return false;
+	}
+
+	return true;
+}
+
+Position Pacman::ConvertPositionToGridPosition(Position position, int speed) const
 {
 	Position gridPosition;
 
-	gridPosition.x = position.x / cellScale.width;
-	gridPosition.y = position.y / cellScale.height;
+	gridPosition.x = (position.x + speed) / cellScale.width;
+	gridPosition.y = (position.y + speed) / cellScale.height;
 
 	return gridPosition;
 }
 
-Position PacMan::ConvertGridPositionToPosition(Position gridPosition)
+Position Pacman::ConvertGridPositionToPosition(Position gridPosition) const
 {
 	Position position;
 
@@ -303,81 +307,57 @@ Position PacMan::ConvertGridPositionToPosition(Position gridPosition)
 	return position;
 }
 
-void PacMan::Draw(HDC hdc, HWND hWnd)
+void Pacman::Draw(HDC hdc, HWND hWnd)
 {
-	wMecro::DrawRectangle(hdc, wMecro::GetClientTransform(hWnd), W_BLACK);
-	wMecro::DrawObject(hdc, walls);
-	for (int i = (int)enemys.size() - 1; i >= 0; i--)
+	DrawRectangle(hdc, wMecro::GetClientTransform(hWnd), W_BLACK);
+	DrawObject(hdc, walls);
+	if (!gameOver)
 	{
-		wMecro::DrawObject(hdc, paths[i]);
-
-		AStar* astar = enemys[i]->GetAStar();
-		if (astar->GetDebug() != debug)
-			astar->SetDebug(debug, paths[i]);
-	}
-	for (int i = 0; i < doorPositions.size(); i++)
-	{
-		Position doorPosition = doorPositions[i];
-		doorPosition.x += cellScale.width / 4;
-		doorPosition.y += cellScale.height / 4;
-
-		Scale doorScale = cellScale;
-		doorScale.width /= 2;
-		doorScale.height /= 2;
-
-		wMecro::Transform doorTransform;
-		doorTransform.position = doorPosition;
-		doorTransform.scale = doorScale;
-
-		wMecro::DrawRectangle(hdc, doorTransform, RGB(255, 128, 0));
-	}
-	for (int i = 0; i < enemys.size(); i++)
-	{
-		if (debug && enemys[i]->DetectedPlayer(this))
+		for (int i = static_cast<int>(enemys.size()) - 1; i >= 0; i--)
 		{
-			Position enemyPosition = enemys[i]->transform.position;
-			enemyPosition.x += cellScale.width / 2;
-			enemyPosition.y += cellScale.height / 2;
+			DrawObject(hdc, paths[i]);
 
-			Position playerPosition = player->transform.position;
-			playerPosition.x += cellScale.width / 2;
-			playerPosition.y += cellScale.height / 2;
-
-			wMecro::DrawLine(hdc, enemyPosition, playerPosition, 3, W_RED);
+			AStar* aStar = enemys[i]->GetAStar();
+			if (aStar->GetDebug() != debug)
+				aStar->SetDebug(debug, paths[i]);
 		}
 	}
-	wMecro::DrawObject(hdc, coins);
-	wMecro::DrawObject(hdc, player);
-	wMecro::DrawObject(hdc, enemys);
-	for (int i = (int)enemys.size() - 1; i >= 0; i--)
+	DrawObject(hdc, doors);
+	if (!gameOver)
 	{
-		wMecro::DrawObject(hdc, enemys[i]);
-
-		if (enemys[i]->GetDebug() != debug)
-			enemys[i]->SetDebug(debug);
-
-		if (enemys[i]->DetectedPlayer(this))
-			enemys[i]->SetDebug(false);
-	}
-}
-
-void PacMan::CheckCoin()
-{
-	for (int i = 0; i < coins.size(); i++)
-	{
-		if (coins[i])
+		for (Enemy*& enemy : enemys)
 		{
-			Position coinGridPosition = ConvertPositionToGridPosition(coins[i]->transform.position);
-			if (coinGridPosition == player->GetGridPosition())
-				Delete(coins[i]);
+			if (debug && enemy->DetectedPlayer(this) && enemy->GetHunter())
+			{
+				Position enemyPosition = enemy->transform.position;
+				enemyPosition.x += cellScale.width / 2;
+				enemyPosition.y += cellScale.height / 2;
+
+				Position playerPosition = player->transform.position;
+				playerPosition.x += cellScale.width / 2;
+				playerPosition.y += cellScale.height / 2;
+
+				wMecro::DrawLine(hdc, enemyPosition, playerPosition, 3, W_RED);
+			}
 		}
 	}
-}
+	DrawObject(hdc, coins);
+	DrawObject(hdc, player);
+	if (!player->IsFallDown())
+	{
+		for (int i = static_cast<int>(enemys.size()) - 1; i >= 0; i--)
+		{
+			DrawObject(hdc, enemys[i]);
 
-bool PacMan::CheckPlayerPath(int map)
-{
-	if (map != WALL && map != DOOR)
-		return true;
+			if (enemys[i]->GetDebug() != debug)
+				enemys[i]->SetDebug(debug);
 
-	return false;
+			if (enemys[i]->DetectedPlayer(this))
+				enemys[i]->SetDebug(false);
+		}
+	}
+	const wstring scoreStr = std::to_wstring(score);
+	DrawTextOut(hdc, scoreTextTransform, scoreStr.c_str(), W_WHITE);
+	if (gameClear)
+		DrawTextOut(hdc, gameClearTextTransform, TEXT("Clear!"), W_WHITE);
 }

@@ -65,6 +65,7 @@
 #define FRAME 30
 
 using std::string;
+using std::wstring;
 using std::ofstream;
 using std::ifstream;
 using std::ios;
@@ -798,6 +799,7 @@ namespace wMecro
 
 	struct Object
 	{
+		virtual ~Object() = default;
 		Transform transform;
 
 		virtual void Draw(HDC hdc) = 0;
@@ -919,7 +921,7 @@ namespace wMecro
 		int distanceX = position1.x - position2.x;
 		int distanceY = position1.y - position2.y;
 
-		int distance = sqrt(distanceX * distanceX + distanceY * distanceY);
+		int distance = (int)sqrt(distanceX * distanceX + distanceY * distanceY);
 
 		return distance;
 	}
@@ -1133,9 +1135,9 @@ namespace wMecro
 
 	inline void DrawTextOut(HDC hdc, Transform transform, LPCWSTR text, COLORREF color = W_BLACK)
 	{
-		int width = transform.scale.width / lstrlen(text);
+		int width = transform.scale.width;
 
-		HFONT myFont = CreateFont(transform.scale.height, width, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, TEXT("±Ã¼­"));
+		HFONT myFont = CreateFont(transform.scale.height, width, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, TEXT("±Ã¼­Ã¼"));
 		HFONT oldFont = (HFONT)SelectObject(hdc, myFont);
 
 		SetTextColor(hdc, color);
@@ -1251,6 +1253,8 @@ namespace wMecro
 		virtual void Draw(HDC hdc, HWND hWnd) = 0;
 
 	public:
+		virtual ~Game() = default;
+
 		Game()
 		{
 			scene = 0;

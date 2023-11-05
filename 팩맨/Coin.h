@@ -4,13 +4,28 @@
 
 enum Type
 {
-	Normal,
+	Small,
 	Big
 };
 
 class Coin : public wMecro::Object
 {
 public:
-	virtual void Draw(HDC hdc) override;
+	Coin(Type type);
+
+	void Draw(HDC hdc) override;
+
+	Type GetType() const { return type; }
+	int GetScore() const { return score; }
+
+	void Sparkle();
+
+private:
+	Type type;
+	bool sparkle;
+	int sparkleTime;
+	int sparkleTimer;
+
+	int score;
 };
 

@@ -65,6 +65,7 @@
 #define FRAME 30
 
 using std::string;
+using std::wstring;
 using std::ofstream;
 using std::ifstream;
 using std::ios;
@@ -702,26 +703,26 @@ namespace cMecro
 	}
 	inline void DrawBox(int x, int y, int width, int height, int color = C_ORIGINAL)
 	{
-		DrawPoint(x, y, "¶£ ", color);
-		DrawWidthLine(x + 1, y, width - 2, "¶° ", color);
-		DrawPoint(x + width - 1, y, "¶§ ", color);
-		DrawHeightLine(x, y + 1, height - 2, "¶¢ ", color);
-		DrawHeightLine(x + width - 1, y + 1, height - 2, "¶¢ ", color);
-		DrawPoint(x, y + height - 1, "¶¶ ", color);
-		DrawWidthLine(x + 1, y + height - 1, width - 2, "¶° ", color);
-		DrawPoint(x + width - 1, y + height - 1, "¶• ", color);
+		DrawPoint(x, y, "‚îå ", color);
+		DrawWidthLine(x + 1, y, width - 2, "‚îÄ ", color);
+		DrawPoint(x + width - 1, y, "‚îê ", color);
+		DrawHeightLine(x, y + 1, height - 2, "‚îÇ ", color);
+		DrawHeightLine(x + width - 1, y + 1, height - 2, "‚îÇ ", color);
+		DrawPoint(x, y + height - 1, "‚îî ", color);
+		DrawWidthLine(x + 1, y + height - 1, width - 2, "‚îÄ ", color);
+		DrawPoint(x + width - 1, y + height - 1, "‚îò ", color);
 	}
 	inline void DrawGrid(int x, int y, int width, int height, int color = C_ORIGINAL)
 	{
-		DrawPoint(x, y, "¶£ ", color);
-		DrawWidthLine(x + 1, y, width - 2, "¶® ", color);
-		DrawPoint(x + width - 1, y, "¶§ ", color);
-		DrawHeightLine(x, y + 1, height - 2, "¶ß ", color);
-		DrawRectangle(x + 1, y + 1, width - 2, height - 2, "¶´ ", color);
-		DrawHeightLine(x + width - 1, y + 1, height - 2, "¶© ", color);
-		DrawPoint(x, y + height - 1, "¶¶ ", color);
-		DrawWidthLine(x + 1, y + height - 1, width - 2, "¶™ ", color);
-		DrawPoint(x + width - 1, y + height - 1, "¶• ", color);
+		DrawPoint(x, y, "‚îå ", color);
+		DrawWidthLine(x + 1, y, width - 2, "‚î¨ ", color);
+		DrawPoint(x + width - 1, y, "‚îê ", color);
+		DrawHeightLine(x, y + 1, height - 2, "‚îú ", color);
+		DrawRectangle(x + 1, y + 1, width - 2, height - 2, "‚îº ", color);
+		DrawHeightLine(x + width - 1, y + 1, height - 2, "‚î§ ", color);
+		DrawPoint(x, y + height - 1, "‚îî ", color);
+		DrawWidthLine(x + 1, y + height - 1, width - 2, "‚î¥ ", color);
+		DrawPoint(x + width - 1, y + height - 1, "‚îò ", color);
 	}
 
 	template <typename Type>
@@ -798,6 +799,7 @@ namespace wMecro
 
 	struct Object
 	{
+		virtual ~Object() = default;
 		Transform transform;
 
 		virtual void Draw(HDC hdc) = 0;
@@ -1133,9 +1135,9 @@ namespace wMecro
 
 	inline void DrawTextOut(HDC hdc, Transform transform, LPCWSTR text, COLORREF color = W_BLACK)
 	{
-		int width = transform.scale.width / lstrlen(text);
+		int width = transform.scale.width;
 
-		HFONT myFont = CreateFont(transform.scale.height, width, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, TEXT("±√º≠"));
+		HFONT myFont = CreateFont(transform.scale.height, width, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, TEXT("Í∂ÅÏÑúÏ≤¥"));
 		HFONT oldFont = (HFONT)SelectObject(hdc, myFont);
 
 		SetTextColor(hdc, color);
@@ -1251,6 +1253,8 @@ namespace wMecro
 		virtual void Draw(HDC hdc, HWND hWnd) = 0;
 
 	public:
+		virtual ~Game() = default;
+
 		Game()
 		{
 			scene = 0;

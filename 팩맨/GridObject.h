@@ -16,12 +16,20 @@ class GridObject : public wMecro::Object
 public:
 	void SetDirection(Direction direction) { this->direction = direction; }
 	void SetGridPosition(Position gridPosition) { this->gridPosition = gridPosition; }
+	void SetTargetGridPosition(Position targetGridPosition) { this->targetGridPosition = targetGridPosition; }
 
-	Direction GetDirection() { return direction; }
-	Position GetGridPosition() { return gridPosition; }
+	Direction GetDirection() const { return direction; }
+	Position GetGridPosition() const { return gridPosition; }
+	Position GetTargetGridPosition() const { return targetGridPosition; }
+
+	void ChangeSpeed(float speedRate);
+	void ResetSpeed();
 
 protected:
 	Direction direction;
 	Position gridPosition;
+	Position targetGridPosition;
+	int speed;
+	int originSpeed;
 };
 

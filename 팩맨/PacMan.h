@@ -6,67 +6,83 @@
 #include "Coin.h"
 #include "Enemy.h"
 #include "Path.h"
+#include "Door.h"
 
 #define WIDTH 19
 #define HEIGHT 22
 
 #define WALL 1
 #define COIN 2
+#define BIG_COIN 3
 #define DOOR 4
 #define PLAYER 5
 #define ENEMY 6
 #define TRANSPARENT_WALL 7
 
-class PacMan : public wMecro::Game
+class Pacman : public wMecro::Game
 {
 public:
-	PacMan(Scale clientScale);
-	~PacMan();
+	Pacman(Scale clientScale);
+	~Pacman() override;
 
-    void SetPlayerSpeed(int playerSpeed) { this->playerSpeed = playerSpeed; }
-    void SetEnemySpeed(int enemySpeed) { this->enemySpeed = enemySpeed; }
     void SetDebug(bool debug) { this->debug = debug; }
+    void SetEnemyHunted(bool hunted) { this->enemyHunted = hunted; }
 
-    int** GetMaps() { return maps; }
-    Scale GetCellScale() { return cellScale; }
-    Player* GetPlayer() { return player; }
+    Player* GetPlayer() const { return player; }
+    vector<Coin*>& GetCoins() { return coins; }
+    vector<Enemy*> GetEnemys() { return enemys; }
     vector<vector<Path*>> GetPaths() { return paths; }
-    int GetEnemySpeed() { return enemySpeed; }
-    int GetDoorOpenCount() { return doorOpenCount; }
-    bool GetDebug() { return debug; }
+    int** GetMaps() const { return maps; }
+    wMecro::Transform GetScoreTextTransform() const { return scoreTextTransform; }
+    Scale GetCellScale() const { return cellScale; }
+    Direction GetInputDirection() const { return inputDirection; }
+    int GetDoorOpenCount() const { return doorOpenCount; }
+    bool GetEnemyHunted() const { return enemyHunted; }
+    bool GetGameOver() const { return gameOver; }
+    bool GetDebug() const { return debug; }
+
+    void InitParameter();
+    void InitEntity();
+    void DeleteEntity();
 
 	void PlayerMoveUpdate();
-	void PlayerGaspUpdate();
+	void PlayerGaspUpdate() const;
     void EnemyMoveUpdate();
-    void EnemyStepUpdate();
+    void EnemyStepUpdate() const;
 
-    void SetPlayerDirection(Direction direction);
-    void OpenDoor();
-    bool GridPositionIsPath(Position position);
+    void SetInputDirection(Direction direction);
+    void AddScore(int score);
+    void ResetAllHuntedTimer() const;
+    void GameOver();
+    void ResetGame();
+    void GameClear();
+    bool AllEnemyIsHunted() const;
 
-    Position ConvertPositionToGridPosition(Position position);
-    Position ConvertGridPositionToPosition(Position gridPosition);
+    Position ConvertPositionToGridPosition(Position position, int speed) const;
+    Position ConvertGridPositionToPosition(Position gridPosition) const;
 
 protected:
-	virtual void Draw(HDC hdc, HWND hWnd) override;
+	void Draw(HDC hdc, HWND hWnd) override;
 
 private:
-    void CheckCoin();
-    bool CheckPlayerPath(int map);
-
 	Player* player;
     vector<Wall*> walls;
     vector<Coin*> coins;
     vector<Enemy*> enemys;
     vector<vector<Path*>> paths;
-    vector<Position> doorPositions;
+    vector<Door*> doors;
+    wMecro::Transform scoreTextTransform;
+    wMecro::Transform gameClearTextTransform;
 
     Scale cellScale;
-    Direction playerDirection;
-
-    int playerSpeed;
-    int enemySpeed;
+    Direction inputDirection;
     int doorOpenCount;
+    int doorOpenTime;
+    int doorOpenTimer;
+    bool enemyHunted;
+    int score;
+    bool gameOver;
+    bool gameClear;
 
     bool debug;
 
@@ -82,17 +98,17 @@ private:
         {1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1},
         {7,7,7,1,2,1,0,0,0,0,0,0,0,1,2,1,7,7,7},
         {1,1,1,1,2,1,0,1,1,4,1,1,0,1,2,1,1,1,1},
-        {0,0,0,0,2,0,0,1,0,6,0,1,0,0,2,0,0,0,0},
+        {0,0,0,0,2,0,0,1,6,6,6,1,0,0,2,0,0,0,0},
         {1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1},
         {7,7,7,1,2,1,0,0,0,0,0,0,0,1,2,1,7,7,7},
         {1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1},
         {1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1},
         {1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1},
-        {1,3,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,3,1},
+        {1,3,2,1,2,2,2,2,2,5,2,2,2,2,2,1,2,3,1},
         {1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1},
         {1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1},
         {1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1},
-        {1,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
+        {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 };

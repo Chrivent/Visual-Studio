@@ -18,7 +18,7 @@
     <ClInclude Include="mecro.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="PacMan.h">
+    <ClInclude Include="Pacman.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
@@ -54,12 +54,21 @@
     <ClInclude Include="GridObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Hunted.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Door.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Eaten.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="팩맨.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PacMan.cpp">
+    <ClCompile Include="Pacman.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
@@ -84,6 +93,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Hunter.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Hunted.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Door.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Eaten.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GridObject.cpp">

@@ -10,44 +10,67 @@ class Enemy : public GridObject
 {
 public:
     Enemy();
-    ~Enemy();
+    ~Enemy() override;
 
-	virtual void Draw(HDC hdc) override;
+    void Draw(HDC hdc) override;
 
-    void SetTargetPosition(Position targetPosition) { this->targetPosition = targetPosition; }
     void SetEndGridPosition(Position endGridPosition) { this->endGridPosition = endGridPosition; }
-    void SetState(State* state) { this->state = state; }
+    void SetStartGridPosition(Position startGridPosition) { this->startGridPosition = startGridPosition; }
     void SetIndex(int index) { this->index = index; }
-    void SetRandFlag(bool randFlag) { this->randFlag = randFlag; }
+    void SetHunter(bool hunter) { this->hunter = hunter; }
+    void SetHunted(bool hunted) { this->hunted = hunted; }
+    void SetEaten(bool eaten) { this->eaten = eaten; }
     void SetDebug(bool debug) { this->debug = debug; }
 
-    Position GetTargetPosition() { return targetPosition; }
-    Position GetEndGridPosition() { return endGridPosition; }
-    AStar* GetAStar() { return aStar; }
-    int GetIndex() { return index; }
-    int GetDetectRange() { return detectRange; }
-    bool GetRandFlag() { return randFlag; }
-    bool GetDebug() { return debug; }
+    AStar* GetAStar() const { return aStar; }
+    int GetIndex() const { return index; }
+    int GetDetectRange() const { return detectRange; }
+    bool GetHunter() const { return hunter; }
+    bool GetHunted() const { return hunted; }
+    float GetHuntedSpeedRate() const { return huntedSpeedRate; }
+    bool GetEaten() const { return eaten; }
+    float GetEatenSpeedRate() const { return eatenSpeedRate; }
+    bool GetDebug() const { return debug; }
 
     void Step();
-    void CreateAStar(int** maps);
-    void Update(PacMan* pacMan);
+    void Move(Pacman* pacman);
     void SetStayPositions(Position startPosition, Scale cellScale);
-    void MoveStay(int distance);
-    bool DetectedPlayer(PacMan* pacMan);
+    void MoveInBox(Pacman* pacman);
+    void MoveHunter(Pacman* pacman);
+    void MoveHunted(Pacman* pacman);
+    void MoveEaten(Pacman* pacman);
+    void ResetHuntedTimer();
+    void GridUpdateEvent(Pacman* pacman);
+    void AStarMoveEvent(Pacman* pacman);
+    void ChangeState(State* state, Pacman* pacman);
+    void Sparkle();
+    bool DetectedPlayer(Pacman* pacman) const;
+    bool GridPositionIsPath(Position gridPosition, Pacman* pacman);
+    bool GridPositionIsAroundPlayer(Position gridPosition, Pacman* pacman) const;
 
 private:
     AStar* aStar;
-    State* state;
+    state* state;
 
-    Position targetPosition;
     Position endGridPosition;
     Position stayPositions[2];
+    Position startGridPosition;
 
     int index;
     int detectRange;
     bool stepOrigin;
     bool randFlag;
+    bool hunter;
+    bool hunted;
+    int huntedTime;
+    int huntedTimer;
+    float huntedSpeedRate;
+    bool eaten;
+    float eatenSpeedRate;
+    bool sparkle;
+    int sparkleTime;
+    int sparkleTimer;
+    int score;
 
     bool debug;
 };

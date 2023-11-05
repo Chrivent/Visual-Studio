@@ -131,13 +131,16 @@
   <ItemGroup>
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Coin.h" />
+    <ClInclude Include="Door.h" />
+    <ClInclude Include="Eaten.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GridObject.h" />
+    <ClInclude Include="Hunted.h" />
     <ClInclude Include="Hunter.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="InBox.h" />
     <ClInclude Include="mecro.h" />
-    <ClInclude Include="PacMan.h" />
+    <ClInclude Include="Pacman.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
@@ -146,11 +149,14 @@
   <ItemGroup>
     <ClCompile Include="AStar.cpp" />
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="Door.cpp" />
+    <ClCompile Include="Eaten.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GridObject.cpp" />
+    <ClCompile Include="Hunted.cpp" />
     <ClCompile Include="Hunter.cpp" />
     <ClCompile Include="InBox.cpp" />
-    <ClCompile Include="PacMan.cpp" />
+    <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Wall.cpp" />

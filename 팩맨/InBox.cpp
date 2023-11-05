@@ -1,6 +1,6 @@
 #include "InBox.h"
 #include "Enemy.h"
-#include "PacMan.h"
+#include "Pacman.h"
 #include "Hunter.h"
 
 InBox& InBox::Instance()
@@ -10,10 +10,20 @@ InBox& InBox::Instance()
     return instance;
 }
 
-void InBox::Update(Enemy* enemy, PacMan* pacMan)
+void InBox::Start(Enemy* enemy, Pacman* pacman)
 {
-    if (pacMan->GetDoorOpenCount() > enemy->GetIndex())
-        enemy->SetState(&Hunter::Instance());
+
+}
+
+void InBox::Update(Enemy* enemy, Pacman* pacman)
+{
+    if (pacman->GetDoorOpenCount() > enemy->GetIndex())
+        enemy->ChangeState(&Hunter::Instance(), pacman);
     else
-        enemy->MoveStay(pacMan->GetEnemySpeed());
+        enemy->MoveInBox(pacman);
+}
+
+void InBox::Exit(Enemy* enemy, Pacman* pacman)
+{
+
 }

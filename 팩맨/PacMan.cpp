@@ -16,7 +16,7 @@ Pacman::Pacman(Scale clientScale)
 
 	InitParameter();
 
-	debug = false;
+	debug = true;
 
 	for (int y = 0; y < HEIGHT; y++)
 	{

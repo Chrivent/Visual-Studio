@@ -41,16 +41,16 @@ public:
     void MoveEaten(Pacman* pacman);
     void ResetHuntedTimer();
     void GridUpdateEvent(Pacman* pacman);
-    void AStarMoveEvent(Pacman* pacman);
+    void AStarMoveEvent(const Pacman* pacman);
     void ChangeState(State* state, Pacman* pacman);
     void Sparkle();
-    bool DetectedPlayer(Pacman* pacman) const;
-    bool GridPositionIsPath(Position gridPosition, Pacman* pacman);
-    bool GridPositionIsAroundPlayer(Position gridPosition, Pacman* pacman) const;
+    bool DetectedPlayer(const Pacman* pacman) const;
+    bool GridPositionIsPath(Position gridPosition, const Pacman* pacman);
+    bool GridPositionIsAroundPlayer(Position gridPosition, const Pacman* pacman) const;
 
 private:
     AStar* aStar;
-    state* state;
+    State* state;
 
     Position endGridPosition;
     Position stayPositions[2];

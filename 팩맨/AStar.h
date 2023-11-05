@@ -32,7 +32,7 @@ private:
 
 	bool debug;
 
-	void ExtractMin(Position& choiceGridPosition, Position endGridPosition, Enemy* enemy, Pacman* pacman) const;
+	void ExtractMin(Position& choiceGridPosition, Position endGridPosition, Enemy* enemy, const Pacman* pacman) const;
 
 	void SetWeight(Position position, int weight) const { weightMap[position.y][position.x] = weight; }
 	int GetWeight(Position position) const { return weightMap[position.y][position.x]; }

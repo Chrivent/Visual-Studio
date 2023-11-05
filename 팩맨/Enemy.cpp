@@ -273,7 +273,7 @@ void Enemy::GridUpdateEvent(Pacman* pacman)
 	}
 }
 
-void Enemy::AStarMoveEvent(Pacman* pacman)
+void Enemy::AStarMoveEvent(const Pacman* pacman)
 {
 	transform.MoveTo(pacman->ConvertGridPositionToPosition(targetGridPosition), speed);
 
@@ -310,12 +310,12 @@ void Enemy::Sparkle()
 		sparkle = false;
 }
 
-bool Enemy::DetectedPlayer(Pacman* pacman) const
+bool Enemy::DetectedPlayer(const Pacman* pacman) const
 {
 	return GridPositionIsAroundPlayer(gridPosition, pacman);
 }
 
-bool Enemy::GridPositionIsPath(Position gridPosition, Pacman* pacman)
+bool Enemy::GridPositionIsPath(Position gridPosition, const Pacman* pacman)
 {
 	const int map = pacman->GetMaps()[gridPosition.y][gridPosition.x];
 
@@ -330,7 +330,7 @@ bool Enemy::GridPositionIsPath(Position gridPosition, Pacman* pacman)
 	return false;
 }
 
-bool Enemy::GridPositionIsAroundPlayer(Position gridPosition, Pacman* pacman) const
+bool Enemy::GridPositionIsAroundPlayer(Position gridPosition, const Pacman* pacman) const
 {
 	const int distanceX = abs(pacman->GetPlayer()->GetGridPosition().x - gridPosition.x);
 	const int distanceY = abs(pacman->GetPlayer()->GetGridPosition().y - gridPosition.y);

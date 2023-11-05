@@ -160,7 +160,7 @@ void AStar::SetDebug(const bool debug, const vector<Path*>& paths)
 	ResetPathDebug(paths);
 }
 
-void AStar::ExtractMin(Position& choiceGridPosition, Position endGridPosition, Enemy* enemy, Pacman* pacman) const
+void AStar::ExtractMin(Position& choiceGridPosition, Position endGridPosition, Enemy* enemy, const Pacman* pacman) const
 {
 	int min = INT_MAX;
 
